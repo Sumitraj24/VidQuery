@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+jinja2
+python-multipart
+supabase
+python-dotenv
+youtube-transcript-api
+yt-dlp
+requests
+httpx
+openai

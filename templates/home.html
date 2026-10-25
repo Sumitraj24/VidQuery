@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="home-container" style="position: relative; overflow: hidden;">
+    <div class="bg-glow purple"></div>
+<section class="hero" style="position: relative; z-index: 1;">
+    <div class="hero-content">
+        <h1>Search. Learn.<br>Understand.<br><span>Directly from Videos.</span></h1>
+        <p>Upload your lectures and find any topic, get instant answers, summaries, notes, mind maps and more — all with timestamps.</p>
+        <div class="hero-buttons">
+            <a href="/dashboard" class="btn-study-animated">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+                Let's Study
+            </a>
+            <button class="btn-ghost">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>
+                Watch Demo
+            </button>
+        </div>
+    </div>
+    
+    <div class="hero-visual">
+        <div class="search-float">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            explain backpropagation
+        </div>
+        
+        <div class="video-mockup">
+            <div class="video-mockup-inner" style="background: url('/static/neural_net.jpg') center/cover no-repeat; width: 100%; height: 100%;">
+            </div>
+            <div class="video-mockup-bar" style="position: absolute; bottom: 0; width: 100%; box-sizing: border-box; z-index: 2;">
+                <span>▶ 12:34 / 58:17</span>
+                <span>⚙ 🔲</span>
+            </div>
+        </div>
+
+        <div class="timestamp-float">
+            <div style="width:36px; height:36px; background:#eff6ff; color:#3b82f6; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+            </div>
+            <div>
+                <div style="font-size:0.8rem; font-weight:700;">Found at 12:34</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Backpropagation explained</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features-grid">
+    <div class="feature-card" style="background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 50%); border: 1px solid #ede9fe;">
+        <div class="feat-icon" style="background: #4f46e5; color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <h3>Topic Search</h3>
+        <p>Find any concept with timestamps</p>
+    </div>
+    <div class="feature-card" style="background: linear-gradient(180deg, #eff6ff 0%, #ffffff 50%); border: 1px solid #dbeafe;">
+        <div class="feat-icon" style="background: #0284c7; color: white; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <h3>AI Summary</h3>
+        <p>Get concise summaries</p>
+    </div>
+    <div class="feature-card" style="background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 50%); border: 1px solid #dcfce7;">
+        <div class="feat-icon" style="background: #16a34a; color: white; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Smart Notes</h3>
+        <p>Generate structured notes</p>
+    </div>
+    <div class="feature-card" style="background: linear-gradient(180deg, #fef2f2 0%, #ffffff 50%); border: 1px solid #fee2e2;">
+        <div class="feat-icon" style="background: #ef4444; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Q&A</h3>
+        <p>Important questions and answers</p>
+    </div>
+    <div class="feature-card" style="background: linear-gradient(180deg, #faf5ff 0%, #ffffff 50%); border: 1px solid #f3e8ff;">
+        <div class="feat-icon" style="background: #9333ea; color: white; box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </div>
+        <h3>Mind Maps</h3>
+        <p>Visualize concepts easily</p>
+    </div>
+</section>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Audio and video files
+*.mp3
+*.m4a
+*.wav
+*.mp4
+*.mov
+*.mkv
+
+# Generated transcripts
+transcript.txt
+
+# Editor and OS files
+.DS_Store
+.vscode/
+.idea/
+
+# Deployment & Vercel
+.vercel/
+
+# Logs & temp files
+*.log
+*.tmp
+.pytest_cache/
+

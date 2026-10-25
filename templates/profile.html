@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Profile Settings - VidQuery{% endblock %}
+{% block content %}
+<style>
+    .profile-container {
+        display: flex; justify-content: center; align-items: center; min-height: 80vh; padding: 2rem;
+    }
+    .profile-card {
+        background: white; border-radius: 24px; border: 1px solid #e2e8f0; padding: 3.5rem 3rem; width: 100%; max-width: 440px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; position: relative;
+    }
+    .avatar-lg {
+        width: 80px; height: 80px; border-radius: 50%;
+        background: linear-gradient(110deg, #2563eb, #3b82f6); color: white;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2rem; font-weight: 700; margin: 0 auto 1.5rem;
+        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+    }
+    .back-btn {
+        position: absolute; top: 1.5rem; left: 1.5rem; color: var(--text-muted); font-weight: 500; 
+        display: flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: color 0.3s;
+    }
+    .back-btn:hover { color: var(--primary); }
+</style>
+
+<div class="profile-container">
+    <div class="profile-card animated-blue-border">
+        <a href="/dashboard" class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back
+        </a>
+        
+        <div class="avatar-lg">
+            {{ user.user_metadata.get('full_name', 'Student')[0]|upper if user and user.user_metadata else 'S' }}
+        </div>
+        
+        <h2 style="font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--text-dark);">Profile Settings</h2>
+        <p style="color: var(--text-muted); margin-bottom: 2.5rem;">Update your account details</p>
+        
+        <form method="POST" action="/profile/update" style="text-align: left;">
+            <div class="input-group">
+                <input type="email" value="{{ user.email if user and user.email else 'test@test.com' }}" disabled style="background: #f8fafc; color: #94a3b8; cursor: not-allowed; border-color: #e2e8f0; border-width: 1px;">
+                <label>Email Address</label>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" name="full_name" id="full_name" value="{{ user.user_metadata.get('full_name', '') if user and user.user_metadata else '' }}" placeholder=" " required>
+                <label for="full_name">Full Name</label>
+            </div>
+            
+            <div class="input-group">
+                <input type="tel" name="phone" id="phone" value="{{ user.user_metadata.get('phone', '') if user and user.user_metadata else '' }}" placeholder=" ">
+                <label for="phone">Phone Number</label>
+            </div>
+            
+            <div class="input-group select-wrapper">
+                <select name="institution_category" id="institution_category" required>
+                    <option value="School" {% if user and user.user_metadata and user.user_metadata.get('institution_category') == 'School' %}selected{% endif %}>School</option>
+                    <option value="College" {% if user and user.user_metadata and user.user_metadata.get('institution_category') == 'College' %}selected{% endif %}>College</option>
+                    <option value="University" {% if user and user.user_metadata and user.user_metadata.get('institution_category') == 'University' %}selected{% endif %}>University</option>
+                </select>
+                <label for="institution_category">Institution</label>
+            </div>
+            
+            <button type="submit" class="btn-submit" style="margin-top: 1rem;">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('updated') === 'true') {
+            const btn = document.querySelector('.btn-submit');
+            const originalText = btn.innerText;
+            btn.innerText = "✓ Saved Successfully";
+            btn.style.background = "#10B981"; // success green
+            btn.style.boxShadow = "0 8px 20px rgba(16,185,129,0.3)";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.background = "";
+                btn.style.boxShadow = "";
+            }, 3000);
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    };
+</script>
+{% endblock %}
