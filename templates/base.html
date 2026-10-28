@@ -17,8 +17,8 @@
         </a>
         <nav class="nav-links">
             <a href="/">Home</a>
-            <a href="#">Features</a>
-            <a href="#">How it works</a>
+            <a href="/#features">Features</a>
+            <a href="/#how-it-works">How it works</a>
         </nav>
         <div class="nav-actions">
             {% if user %}
@@ -47,8 +47,24 @@
             </div>
 
             <h2 id="authTitle" style="text-align:center; font-size:2rem; font-weight:800; color:var(--text-dark); margin-bottom:0.5rem; letter-spacing:-0.02em;">Welcome Back</h2>
-            <p id="authSubtitle" style="text-align:center; color:var(--text-muted); margin-bottom:2rem;">Sign in to continue to your dashboard</p>
+            <p id="authSubtitle" style="text-align:center; color:var(--text-muted); margin-bottom:1.5rem;">Sign in to continue to your dashboard</p>
             
+            <!-- Demo Credentials Banner -->
+            <div id="demoLoginBadge" style="background: linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(147,51,234,0.08) 100%); border: 1px solid rgba(37,99,235,0.22); border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+                <div style="font-size: 0.82rem; line-height: 1.45;">
+                    <div style="font-weight: 700; color: #1d4ed8; display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Demo Account
+                    </div>
+                    <div style="color: #475569; font-size: 0.78rem; margin-top: 2px;">
+                        <span style="font-family: monospace; font-weight: 600; color: #1e293b;">demo@vidquery.com</span> &bull; <span style="font-family: monospace; font-weight: 600; color: #1e293b;">demo123</span>
+                    </div>
+                </div>
+                <button type="button" onclick="fillDemoCredentials()" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none; border-radius: 8px; padding: 0.5rem 0.9rem; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; box-shadow: 0 2px 8px rgba(37,99,235,0.28);">
+                    Use Demo
+                </button>
+            </div>
+
             {% if error %}
             <div class="auth-error" style="background: #fee2e2; color: #b91c1c; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; animation: shake 0.4s ease-in-out;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -93,6 +109,39 @@
     </div>
 
     <script>
+        function fillDemoCredentials() {
+            setAuthMode('login');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            if (emailInput && passwordInput) {
+                emailInput.value = 'demo@vidquery.com';
+                passwordInput.value = 'demo123';
+                emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+                passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+                const submitBtn = document.getElementById('authSubmit');
+                if (submitBtn) {
+                    submitBtn.click();
+                }
+            }
+        }
+        // Opens a dashboard feature; signed-out visitors are asked to log in first.
+        function openFeature(feature) {
+            {% if user %}
+            window.location.href = '/dashboard?open=' + encodeURIComponent(feature);
+            {% else %}
+            try { sessionStorage.setItem('vq_open', feature); } catch (e) {}
+            openAuthModal('login');
+            {% endif %}
+        }
+        // "Watch Demo": signs into the demo account and opens a sample lecture.
+        function watchDemo() {
+            {% if user %}
+            window.location.href = '/dashboard?v=aircAruvnKk';
+            {% else %}
+            try { sessionStorage.setItem('vq_demo_video', 'aircAruvnKk'); } catch (e) {}
+            fillDemoCredentials();
+            {% endif %}
+        }
         function openAuthModal(mode) {
             document.getElementById('authModal').style.display = 'flex';
             setAuthMode(mode);
@@ -111,12 +160,14 @@
             const submitBtn = document.getElementById('authSubmit');
             const switchText = document.getElementById('authSwitchText');
             const switchLink = document.getElementById('authSwitchLink');
+            const demoBadge = document.getElementById('demoLoginBadge');
             
             if (mode === 'login') {
                 form.action = '/login';
                 form.classList.remove('register-mode');
                 document.getElementById('full_name').required = false;
                 document.getElementById('education_level').required = false;
+                if (demoBadge) demoBadge.style.display = 'flex';
                 
                 title.innerText = 'Welcome Back';
                 subtitle.innerText = 'Sign in to continue to your dashboard';
@@ -128,6 +179,7 @@
                 form.classList.add('register-mode');
                 document.getElementById('full_name').required = true;
                 document.getElementById('education_level').required = true;
+                if (demoBadge) demoBadge.style.display = 'none';
                 
                 title.innerText = 'Create Account';
                 subtitle.innerText = 'Sign up to get started for free';

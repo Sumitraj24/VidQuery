@@ -78,6 +78,65 @@
         }
         .yt-import-btn:hover { background: linear-gradient(135deg, #2563eb, #4f46e5); box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4); transform: scale(1.05); }
         .yt-import-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(59, 130, 246, 0.4); }
+
+        /* ---- Shared view header ---- */
+        .view-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+        .view-sub { color: #64748B; margin-top: 0.35rem; font-size: 0.95rem; }
+        .view-btn { display: inline-flex; align-items: center; gap: 0.45rem; background: white; color: #1E293B; border: 1.5px solid #E2E8F0; border-radius: 99px; padding: 0.55rem 1.1rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .view-btn:hover { border-color: #3B82F6; color: #2563EB; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(59,130,246,0.15); }
+        .view-btn.primary { background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; border-color: transparent; box-shadow: 0 4px 10px rgba(59,130,246,0.3); }
+        .view-btn.primary:hover { color: white; box-shadow: 0 6px 15px rgba(59,130,246,0.4); }
+        .view-btn:disabled { opacity: 0.5; pointer-events: none; }
+        .view-empty { text-align: center; padding: 4rem 1rem; background: white; border: 1.5px dashed #CBD5E1; border-radius: 16px; color: #64748B; }
+        .view-empty h3 { color: #0F172A; font-size: 1.15rem; margin-bottom: 0.4rem; }
+        .view-empty .view-btn { margin-top: 1.25rem; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ---- Mind map ---- */
+        .mm-root-wrap { display: flex; justify-content: center; position: relative; padding-bottom: 2rem; }
+        .mm-root-wrap::after { content: ""; position: absolute; bottom: 0; left: 50%; width: 2px; height: 2rem; background: linear-gradient(#93C5FD, #BFDBFE); }
+        .mm-root { background: linear-gradient(135deg, #3B82F6, #6366F1); color: white; font-weight: 800; font-size: 1.15rem; padding: 1rem 1.75rem; border-radius: 18px; text-align: center; max-width: 560px; box-shadow: 0 12px 30px -8px rgba(79,70,229,0.45); animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+        .mm-branches { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.25rem; border-top: 2px solid #BFDBFE; padding-top: 1.75rem; }
+        .mm-branch { background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 1.1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.25s cubic-bezier(0.4,0,0.2,1); animation: fadeUp 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+        .mm-branch:hover { transform: translateY(-4px); box-shadow: 0 14px 28px rgba(15,23,42,0.08); border-color: #BFDBFE; }
+        .mm-main { display: flex; align-items: center; gap: 0.7rem; width: 100%; background: none; border: none; cursor: pointer; text-align: left; font-family: 'Inter', sans-serif; padding: 0; margin-bottom: 0.85rem; }
+        .mm-dot { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; }
+        .mm-main-title { flex: 1; font-weight: 700; font-size: 1.02rem; color: #0F172A; }
+        .mm-time { font-weight: 700; font-size: 0.72rem; padding: 0.25rem 0.55rem; border-radius: 6px; background: #F1F5F9; color: #475569; transition: all 0.2s; white-space: nowrap; }
+        .mm-main:hover .mm-time, .mm-child:hover .mm-time { background: linear-gradient(135deg, #3B82F6, #2563EB); color: white; }
+        .mm-children { display: flex; flex-direction: column; gap: 0.45rem; border-left: 2px solid #E2E8F0; margin-left: 16px; padding-left: 0.9rem; }
+        .mm-child { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 10px; padding: 0.55rem 0.7rem; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.88rem; color: #334155; text-align: left; transition: all 0.2s; }
+        .mm-child:hover { background: #EFF6FF; border-color: #BFDBFE; color: #1D4ED8; transform: translateX(3px); }
+        .mm-source { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: #92400E; background: #FEF3C7; padding: 0.3rem 0.7rem; border-radius: 99px; margin-top: 0.5rem; }
+
+        /* ---- Notes ---- */
+        .notes-card { background: white; border: 1px solid #E2E8F0; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); overflow: hidden; animation: fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+        .notes-card-head { display: flex; align-items: center; gap: 0.85rem; padding: 1rem 1.25rem; border-bottom: 1px solid #E2E8F0; background: #F8FAFC; }
+        .notes-card-head img { width: 72px; height: 40px; object-fit: cover; border-radius: 8px; }
+        .notes-card-head b { font-size: 0.95rem; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .notes-area { width: 100%; min-height: 55vh; border: none; outline: none; resize: vertical; padding: 1.25rem 1.5rem; font-family: 'Inter', sans-serif; font-size: 0.98rem; line-height: 1.75; color: #1E293B; box-sizing: border-box; }
+        .notes-area::placeholder { color: #94A3B8; }
+        .notes-saved { font-size: 0.8rem; color: #10B981; font-weight: 600; min-width: 60px; text-align: right; }
+
+        /* ---- Chat message extras ---- */
+        .bubble ul, .bubble ol { padding-left: 1.25rem; margin: 0.4rem 0; }
+        .bubble li { margin: 0.25rem 0; }
+        .bubble h4 { font-size: 1rem; margin: 0.9rem 0 0.3rem; color: #0F172A; }
+        .bubble p + p { margin-top: 0.6rem; }
+        .ts-link { display: inline-block; font-weight: 700; font-size: 0.78rem; padding: 0.05rem 0.45rem; border-radius: 6px; background: #EFF6FF; color: #2563EB; cursor: pointer; border: none; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .ts-link:hover { background: #2563EB; color: white; }
+        .msg-tools { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+        .msg-tools button { background: none; border: 1px solid #E2E8F0; border-radius: 99px; padding: 0.3rem 0.75rem; font-size: 0.78rem; font-weight: 600; color: #64748B; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .msg-tools button:hover { border-color: #3B82F6; color: #2563EB; background: #EFF6FF; }
+        /* ---- Reply language ---- */
+        .lang-bar { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.6rem 1.5rem; border-top: 1px solid #E2E8F0; background: white; flex-shrink: 0; }
+        .lang-label { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; font-weight: 600; color: #64748B; }
+        .lang-pills { display: flex; gap: 0.25rem; background: #F1F5F9; padding: 0.25rem; border-radius: 99px; border: 1px solid #E2E8F0; }
+        .lang-pills button { border: none; background: transparent; padding: 0.3rem 0.8rem; border-radius: 99px; font-size: 0.78rem; font-weight: 600; color: #64748B; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .lang-pills button:hover { color: #0F172A; }
+        .lang-pills button.active { background: white; color: #2563EB; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .chat-input { border-top: none !important; padding-top: 0.5rem !important; }
+        .offline-tag { display: inline-block; font-size: 0.72rem; font-weight: 600; color: #92400E; background: #FEF3C7; padding: 0.15rem 0.55rem; border-radius: 99px; margin-bottom: 0.5rem; }
     </style>
     <script src="https://www.youtube.com/iframe_api"></script>
 </head>
@@ -93,12 +152,12 @@
             </a>
             
             <nav class="side-nav">
-                <a href="#" class="side-item" onclick="showWorkspace()"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Home</a>
-                <a href="#" class="side-item" onclick="showMyVideos()"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg> My Videos</a>
-                <a href="#" class="side-item active" onclick="showWorkspace()"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Chat</a>
-                <a href="#" class="side-item"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Mind Maps</a>
-                <a href="#" class="side-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Notes</a>
-                <a href="#" class="side-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</a>
+                <a href="#" class="side-item" onclick="showWorkspace(); return false;"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Home</a>
+                <a href="#" class="side-item" onclick="showMyVideos(); return false;"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg> My Videos</a>
+                <a href="#" class="side-item active" onclick="showWorkspace(); return false;"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Chat</a>
+                <a href="#" class="side-item" onclick="showMindMap(); return false;"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Mind Maps</a>
+                <a href="#" class="side-item" onclick="showNotes(); return false;"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Notes</a>
+                <a href="/profile" class="side-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</a>
             </nav>
 
             <div class="lib-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -209,6 +268,17 @@
 
                     </div>
 
+                    <div class="lang-bar" role="group" aria-label="Reply language">
+                        <span class="lang-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            Reply in
+                        </span>
+                        <div class="lang-pills">
+                            <button type="button" data-lang="auto" title="Matches the language you type in">Auto</button>
+                            <button type="button" data-lang="english">English</button>
+                            <button type="button" data-lang="hinglish">Hinglish</button>
+                        </div>
+                    </div>
                     <div class="chat-input" id="chatInputContainer">
                         <input type="text" id="chatInputText" placeholder="Ask something about this video..." onkeypress="handleChatEnter(event)">
                         <button onclick="sendChatMessage()"><svg width="18" height="18" fill="white" stroke="white" stroke-width="1.5" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
@@ -222,6 +292,40 @@
                     <!-- History Thumbnails -->
                 </div>
             </div>
+            <div class="my-videos-view" id="mindMapView" style="display: none; padding: 2.5rem; overflow-y: auto; flex: 1;">
+                <div class="view-head">
+                    <div>
+                        <h2 style="font-size: 1.8rem; font-weight: 800; color: #0F172A; margin: 0;">Mind Map</h2>
+                        <p class="view-sub" id="mindMapSub">See how the ideas in your video connect.</p>
+                    </div>
+                    <button class="view-btn" id="mindMapRegen" onclick="loadMindMap(true)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.5 6.2L3 16M3 21v-5h5"/></svg>
+                        Regenerate
+                    </button>
+                </div>
+                <div id="mindMapContent"></div>
+            </div>
+
+            <div class="my-videos-view" id="notesView" style="display: none; padding: 2.5rem; overflow-y: auto; flex: 1;">
+                <div class="view-head">
+                    <div>
+                        <h2 style="font-size: 1.8rem; font-weight: 800; color: #0F172A; margin: 0;">Notes</h2>
+                        <p class="view-sub" id="notesSub">Your personal notes for this video, saved automatically.</p>
+                    </div>
+                    <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center;">
+                        <span id="notesSaved" class="notes-saved"></span>
+                        <button class="view-btn" onclick="insertNoteTimestamp()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                            Insert timestamp
+                        </button>
+                        <button class="view-btn primary" onclick="exportNotes()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+                            Export .md
+                        </button>
+                    </div>
+                </div>
+                <div id="notesContent"></div>
+            </div>
         </main>
     </div>
 
@@ -232,6 +336,90 @@
         let currentQuery = "";
         let searchTimeout = null;
         let ytPlayer = null;
+        let currentVideoId = null;
+        let currentVideoData = null;
+        let chatBusy = false;
+
+        // The IFrame API loads asynchronously; wait for it before creating a player.
+        function whenYTReady() {
+            return new Promise(resolve => {
+                (function check() { (window.YT && YT.Player) ? resolve() : setTimeout(check, 100); })();
+            });
+        }
+        function escapeHTML(v) {
+            return String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+        }
+        function parseVideoId(input) {
+            input = String(input || '').trim();
+            if (/^[\w-]{11}$/.test(input)) return input;
+            const m = input.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{11})/i);
+            return m ? m[1] : null;
+        }
+        function fmtTime(sec) {
+            sec = Math.max(0, Math.floor(sec || 0));
+            const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s2 = String(sec % 60).padStart(2, '0');
+            return h ? `${h}:${String(m).padStart(2, '0')}:${s2}` : `${m}:${s2}`;
+        }
+        function timeToSecs(str) {
+            const parts = String(str || '').trim().split(':').map(n => parseInt(n, 10));
+            if (!parts.length || parts.some(isNaN)) return 0;
+            return parts.reduce((acc, n) => acc * 60 + n, 0);
+        }
+        // Per-video maps in localStorage (chats + notes keep working without a database)
+        function readMap(key) { try { return JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (e) { return {}; } }
+        function writeMap(key, obj) { try { localStorage.setItem(key, JSON.stringify(obj)); return true; } catch (e) { return false; } }
+        const CHATS_KEY = 'vidquery_chats', NOTES_KEY = 'vidquery_notes';
+
+        // Reply language: auto (match the student's own style), english or hinglish.
+        let replyLanguage = 'auto';
+        try { replyLanguage = localStorage.getItem('vq_lang') || 'auto'; } catch (e) {}
+        function setReplyLanguage(lang) {
+            replyLanguage = lang;
+            try { localStorage.setItem('vq_lang', lang); } catch (e) {}
+            document.querySelectorAll('.lang-pills button').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+            const input = document.getElementById('chatInputText');
+            if (input) input.placeholder = lang === 'hinglish' ? 'Is video ke baare mein kuch bhi poochho...' : 'Ask something about this video...';
+        }
+        document.querySelectorAll('.lang-pills button').forEach(b => b.addEventListener('click', () => {
+            setReplyLanguage(b.dataset.lang);
+            const names = { auto: 'Auto: replies in the language you type', english: 'Replies in English', hinglish: 'Replies in Hinglish' };
+            showToast('🌐 ' + names[b.dataset.lang]);
+        }));
+        setReplyLanguage(replyLanguage);
+
+        // Safe, minimal markdown for assistant answers; [mm:ss] become clickable.
+        function inlineMd(text) {
+            return text
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/\[(\d{1,2}:\d{2}(?::\d{2})?)\]|\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g, (match, a, b) => {
+                    const t = a || b;
+                    return currentVideoId ? `<button type="button" class="ts-link" onclick="seekToTimeStr('${t}')">▶ ${t}</button>` : match;
+                });
+        }
+        function renderAnswer(src) {
+            if (src == null) src = '';
+            if (Array.isArray(src)) src = src.map(x => typeof x === 'string' ? `- ${x}` : `- ${Object.values(x || {}).join(' — ')}`).join('\n');
+            else if (typeof src === 'object') src = Object.entries(src).map(([k, v]) => `**${k}**: ${typeof v === 'string' ? v : JSON.stringify(v)}`).join('\n');
+            const lines = escapeHTML(String(src).replace(/\\n/g, '\n')).split('\n');
+            let html = '', list = null, para = [];
+            const flushPara = () => { if (para.length) { html += `<p>${para.map(inlineMd).join('<br>')}</p>`; para = []; } };
+            const flushList = () => { if (list) { html += `</${list}>`; list = null; } };
+            for (const raw of lines) {
+                const line = raw.trim(); let m;
+                if (!line) { flushPara(); flushList(); continue; }
+                if ((m = line.match(/^#{1,6}\s+(.*)$/))) { flushPara(); flushList(); html += `<h4>${inlineMd(m[1])}</h4>`; continue; }
+                if ((m = line.match(/^[-*•]\s+(.*)$/))) { flushPara(); if (list !== 'ul') { flushList(); html += '<ul>'; list = 'ul'; } html += `<li>${inlineMd(m[1])}</li>`; continue; }
+                if ((m = line.match(/^\d+[.)]\s+(.*)$/))) { flushPara(); if (list !== 'ol') { flushList(); html += '<ol>'; list = 'ol'; } html += `<li>${inlineMd(m[1])}</li>`; continue; }
+                flushList(); para.push(line);
+            }
+            flushPara(); flushList();
+            return html;
+        }
+        function answerText(src) {
+            if (typeof src === 'string') return src.replace(/\\n/g, '\n');
+            return JSON.stringify(src, null, 2);
+        }
         
         // Profile Dropdown close if clicked outside
         window.onclick = function(event) {
@@ -249,6 +437,7 @@
         // Welcome Toast
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
+            handleDeepLinks(urlParams);
             if (urlParams.get('welcome')) {
                 const fullUserName = "{{ user.user_metadata.get('full_name', 'Student') if user and user.user_metadata else 'Student' }}";
                 const firstName = fullUserName.split(' ')[0];
@@ -258,13 +447,40 @@
             }
         };
 
-        function showToast(title, message) {
+        // Deep links from the home page: ?v=<id> opens a video, ?open=<feature> opens a feature.
+        async function handleDeepLinks(urlParams) {
+            let videoId = urlParams.get('v'), feature = urlParams.get('open');
+            try {
+                videoId = videoId || sessionStorage.getItem('vq_demo_video');
+                feature = feature || sessionStorage.getItem('vq_open');
+                sessionStorage.removeItem('vq_demo_video');
+                sessionStorage.removeItem('vq_open');
+            } catch (e) {}
+            if (videoId && parseVideoId(videoId)) {
+                document.getElementById('ytInput').value = 'https://www.youtube.com/watch?v=' + parseVideoId(videoId);
+                await processYouTube();
+            }
+            if (!feature) return;
+            const tabs = document.querySelectorAll('#rightTabs .tab');
+            if (feature === 'mindmap') showMindMap();
+            else if (feature === 'notes') showNotes();
+            else if (feature === 'videos') showMyVideos();
+            else if (feature === 'summary') triggerSmartAction('summary', tabs[1]);
+            else if (feature === 'qa') triggerSmartAction('qa', tabs[3]);
+            else if (feature === 'search') {
+                showWorkspace();
+                document.getElementById(currentVideoId ? 'searchInput' : 'ytInput').focus();
+                if (!currentVideoId) showToast('🔍 Topic Search', 'Import a video, then search any topic in it.');
+            }
+        }
+
+        function showToast(title, message = '') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = 'toast-animated-border';
             toast.innerHTML = `
                 <div style="font-weight: 700; color: #1E293B; font-size: 1.05rem;">${title}</div>
-                <div style="color: #64748B; font-size: 0.9rem; line-height: 1.5;">${message}</div>
+                ${message ? `<div style="color: #64748B; font-size: 0.9rem; line-height: 1.5;">${message}</div>` : ''}
             `;
             container.appendChild(toast);
             
@@ -283,7 +499,8 @@
         }
 
         // Dynamic Chat System
-        function startNewChat() {
+        // "New Chat" also forgets the saved conversation; loading history only resets the view.
+        function startNewChat(forgetSaved = true) {
             const chatArea = document.getElementById('chatArea');
             chatArea.innerHTML = `
                 <div class="msg ai">
@@ -291,81 +508,27 @@
                     <div class="bubble">Chat cleared! How can I help you?</div>
                 </div>
             `;
+            if (forgetSaved && currentVideoId) {
+                const chats = readMap(CHATS_KEY);
+                delete chats[currentVideoId];
+                writeMap(CHATS_KEY, chats);
+            }
             // Reset to chat tab if we were on summary/notes
             document.querySelectorAll('#rightTabs .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#rightTabs .tab').classList.add('active');
             document.getElementById('chatInputContainer').style.display = 'flex';
         }
-        
-        async function loadChatHistory(video_id) {
-            startNewChat(); // Clear current chat
-            try {
-                const res = await fetch(`/api/history/${video_id}`);
-                const data = await res.json();
-                if (data.history && data.history.length > 0) {
-                    const chatArea = document.getElementById('chatArea');
-                    chatArea.innerHTML = ''; // wipe welcome message
-                    
-                    data.history.forEach(item => {
-                        // User message
-                        const userMsg = document.createElement('div');
-                        userMsg.className = 'msg user';
-                        userMsg.innerHTML = `<div class="bubble">${item.query}</div>`;
-                        chatArea.appendChild(userMsg);
-                        
-                        // AI message
-                        const aiMsg = document.createElement('div');
-                        aiMsg.className = 'msg ai';
-                        
-                        let parsedResp = {};
-                        try { parsedResp = JSON.parse(item.response); } catch(e){}
-                        
-                        let html = `<p>${(parsedResp.answer || item.response || '').replace(/\\n/g, '<br>')}</p>`;
-                        if (parsedResp.citation) {
-                            html += `
-                            <p style="margin-top:1rem">This is explained in the video at:</p>
-                            <div onclick="seekToTimeStr('${parsedResp.citation.start_time}')" style="margin-top:1rem; padding: 1rem; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0; display: flex; gap: 1rem; align-items: center; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#BFDBFE'" onmouseout="this.style.background='#F8FAFC'">
-                                <div style="width: 40px; height: 40px; background: #CBD5E1; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                    <svg width="20" height="20" fill="#0F172A" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                </div>
-                                <div>
-                                    <div style="font-weight: 700; color: #0F172A; font-size: 0.85rem;">${parsedResp.citation.start_time} - ${parsedResp.citation.end_time}</div>
-                                    <div style="font-size: 0.9rem; color: #64748B;">${parsedResp.citation.title}</div>
-                                </div>
-                            </div>`;
-                        }
-                        
-                        aiMsg.innerHTML = `
-                            <div class="msg-avatar">AI</div>
-                            <div class="bubble">${html}</div>
-                        `;
-                        chatArea.appendChild(aiMsg);
-                    });
-                    chatArea.scrollTop = chatArea.scrollHeight;
-                }
-            } catch (err) {
-                console.error("Failed to load history", err);
-            }
-        }
-        async function sendChatMessage(customText = null) {
-            const input = document.getElementById('chatInputText');
-            const text = customText || input.value.trim();
-            if (!text) return;
-            
+
+        function addUserBubble(text) {
             const chatArea = document.getElementById('chatArea');
-            
-            // Add User Message
             const userMsg = document.createElement('div');
             userMsg.className = 'msg user';
-            userMsg.innerHTML = `<div class="bubble">${text}</div>`;
+            userMsg.innerHTML = `<div class="bubble">${escapeHTML(text)}</div>`;
             chatArea.appendChild(userMsg);
-            
-            if (!customText) {
-                input.value = '';
-            }
-            chatArea.scrollTop = chatArea.scrollHeight;
-            
-            // Simulate AI Loading
+            return userMsg;
+        }
+        function addAIBubble() {
+            const chatArea = document.getElementById('chatArea');
             const aiMsg = document.createElement('div');
             aiMsg.className = 'msg ai';
             aiMsg.innerHTML = `
@@ -375,49 +538,119 @@
                 </div>
             `;
             chatArea.appendChild(aiMsg);
+            return aiMsg;
+        }
+        function fillAIBubble(aiMsg, data, label) {
+            let html = data.source === 'offline' ? '<span class="offline-tag" title="The AI gateway is unreachable, so this answer comes from searching the transcript.">Offline answer · from the transcript</span>' : '';
+            html += renderAnswer(data.answer);
+            const c = data.citation;
+            if (c && c.start_time) {
+                html += `
+                <p style="margin-top:1rem">This is explained in the video at:</p>
+                <div onclick="seekToTimeStr('${escapeHTML(c.start_time)}')" style="margin-top:1rem; padding: 1rem; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0; display: flex; gap: 1rem; align-items: center; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#BFDBFE'" onmouseout="this.style.background='#F8FAFC'">
+                    <div style="width: 40px; height: 40px; background: #CBD5E1; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <svg width="20" height="20" fill="#0F172A" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; color: #0F172A; font-size: 0.85rem;">${escapeHTML(c.start_time)}${c.end_time ? ' - ' + escapeHTML(c.end_time) : ''}</div>
+                        <div style="font-size: 0.9rem; color: #64748B;">${escapeHTML(c.title || 'Jump to this part')}</div>
+                    </div>
+                </div>`;
+            }
+            if (currentVideoId) {
+                html += `<div class="msg-tools"><button type="button" onclick="copyAnswer(this)">Copy</button><button type="button" onclick="saveAnswerToNotes(this)">Save to Notes</button></div>`;
+            }
+            const bubble = aiMsg.querySelector('.bubble');
+            bubble.innerHTML = html;
+            bubble.dataset.raw = answerText(data.answer);
+            bubble.dataset.label = label || '';
+        }
+        function copyAnswer(btn) {
+            const raw = btn.closest('.bubble').dataset.raw || '';
+            navigator.clipboard?.writeText(raw).then(() => { btn.innerText = 'Copied'; setTimeout(() => btn.innerText = 'Copy', 1500); });
+        }
+        function saveAnswerToNotes(btn) {
+            const bubble = btn.closest('.bubble');
+            appendToNotes(`### ${bubble.dataset.label || 'From the assistant'}\n${bubble.dataset.raw || ''}`);
+            btn.innerText = '✓ Saved';
+            btn.disabled = true;
+            showToast('📝 Saved to Notes', 'Open Notes in the sidebar to review it.');
+        }
+
+        async function loadChatHistory(video_id) {
+            startNewChat(false); // Clear the view, keep saved chats
+            const chatArea = document.getElementById('chatArea');
+            const renderItems = items => {
+                chatArea.innerHTML = '';
+                items.forEach(item => { addUserBubble(item.q); fillAIBubble(addAIBubble(), item.r, item.q); });
+                chatArea.scrollTop = chatArea.scrollHeight;
+            };
+            const local = readMap(CHATS_KEY)[video_id];
+            if (local && local.length) { renderItems(local); return; }
+            try {
+                const res = await fetch(`/api/history/${encodeURIComponent(video_id)}`);
+                const data = await res.json();
+                if (video_id !== currentVideoId || !data.history || !data.history.length) return;
+                const items = data.history.map(item => {
+                    let parsed;
+                    try { parsed = JSON.parse(item.response); } catch (e) { parsed = { answer: item.response }; }
+                    return { q: item.query, r: parsed };
+                });
+                const chats = readMap(CHATS_KEY); chats[video_id] = items; writeMap(CHATS_KEY, chats);
+                renderItems(items);
+            } catch (err) {
+                console.error("Failed to load history", err);
+            }
+        }
+        async function sendChatMessage(customText = null, mode = 'chat', label = null) {
+            const input = document.getElementById('chatInputText');
+            const text = customText || input.value.trim();
+            if (!text || chatBusy) return;
+            chatBusy = true;
+            const shown = label || text;
+            const chatArea = document.getElementById('chatArea');
+
+            addUserBubble(shown);
+            if (!customText) input.value = '';
+            const aiMsg = addAIBubble();
             chatArea.scrollTop = chatArea.scrollHeight;
-            
+
             try {
                 let transcriptText = "";
                 currentTranscript.forEach(t => {
-                    const mins = Math.floor(t.start / 60);
-                    const secs = Math.floor(t.start % 60).toString().padStart(2, '0');
-                    transcriptText += `[${mins}:${secs}] ${t.text}\n`;
+                    transcriptText += `[${fmtTime(t.start)}] ${t.text}\n`;
                 });
-                
+
                 const res = await fetch('/api/chat', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         query: text,
-                        video_id: ytPlayer ? "video" : "", 
+                        mode: mode,
+                        language: replyLanguage,
+                        video_id: currentVideoId || "",
                         transcript_text: transcriptText
                     })
                 });
+                if (!res.ok) throw new Error('Request failed');
                 const data = await res.json();
-                
-                let html = `<p>${data.answer.replace(/\\n/g, '<br>')}</p>`;
-                if (data.citation) {
-                    html += `
-                    <p style="margin-top:1rem">This is explained in the video at:</p>
-                    <div onclick="seekToTimeStr('${data.citation.start_time}')" style="margin-top:1rem; padding: 1rem; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0; display: flex; gap: 1rem; align-items: center; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#BFDBFE'" onmouseout="this.style.background='#F8FAFC'">
-                        <div style="width: 40px; height: 40px; background: #CBD5E1; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                            <svg width="20" height="20" fill="#0F172A" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        </div>
-                        <div>
-                            <div style="font-weight: 700; color: #0F172A; font-size: 0.85rem;">${data.citation.start_time} - ${data.citation.end_time}</div>
-                            <div style="font-size: 0.9rem; color: #64748B;">${data.citation.title}</div>
-                        </div>
-                    </div>`;
+                fillAIBubble(aiMsg, data, shown);
+
+                if (currentVideoId) {
+                    const chats = readMap(CHATS_KEY);
+                    const items = chats[currentVideoId] || [];
+                    items.push({ q: shown, r: data });
+                    chats[currentVideoId] = items.slice(-60);
+                    writeMap(CHATS_KEY, chats);
                 }
-                
-                aiMsg.querySelector('.bubble').innerHTML = html;
             } catch (err) {
                 aiMsg.querySelector('.bubble').innerHTML = `<p style="color: #ef4444;">Sorry, I encountered an error. Please try again.</p>`;
+            } finally {
+                chatBusy = false;
             }
             chatArea.scrollTop = chatArea.scrollHeight;
         }
-        
+
         function seekToTimeStr(timeStr) {
             const parts = timeStr.split(':');
             let secs = 0;
@@ -431,27 +664,27 @@
             // Update active tab styling
             document.querySelectorAll('#rightTabs .tab').forEach(t => t.classList.remove('active'));
             element.classList.add('active');
-            
+
             if(action === 'chat') {
                 document.getElementById('chatInputContainer').style.display = 'flex';
-            } else {
-                document.getElementById('chatInputContainer').style.display = 'none';
-            }
-            
-            if (!ytPlayer) {
-                showToast("Please import a video first!");
                 return;
             }
-            
+            document.getElementById('chatInputContainer').style.display = 'none';
+
+            if (!ytPlayer || !currentVideoId) {
+                showToast("🎬 Import a video first", "Summary, Notes and Q&A work on the current video.");
+                return;
+            }
+
             if (action === 'summary') {
-                sendChatMessage("Provide a highly detailed and structured summary of the entire video.");
+                sendChatMessage("Provide a highly detailed and structured summary of the entire video.", 'summary', 'Summarize this video');
             } else if (action === 'notes') {
-                sendChatMessage("Create comprehensive study notes for this video, including key definitions, formulas (if any), and important concepts.");
+                sendChatMessage("Create comprehensive study notes for this video, including key definitions, formulas (if any), and important concepts.", 'notes', 'Make study notes');
             } else if (action === 'qa') {
-                sendChatMessage("Generate 5 practice questions based on this video, followed by their answers.");
+                sendChatMessage("Generate 5 practice questions based on this video, followed by their answers.", 'qa', 'Quiz me on this video');
             }
         }
-        
+
         function handleChatEnter(event) {
             if (event.key === 'Enter') {
                 sendChatMessage();
@@ -523,10 +756,10 @@
                 }
                 momentsHTML += `
                     <div class="moment ${idx === 0 ? 'active' : ''}">
-                        <div class="m-time" onclick="seekToTime(${timeSecs})" style="cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#BFDBFE'" onmouseout="this.style.background='#F1F5F9'">${m.time}</div>
+                        <div class="m-time" onclick="seekToTime(${timeSecs})" style="cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#BFDBFE'" onmouseout="this.style.background='#F1F5F9'">${escapeHTML(m.time)}</div>
                         <div>
-                            <div class="m-title">${m.title}</div>
-                            <div style="font-size:0.8rem; color:#64748B; margin-top:0.3rem">${m.desc}</div>
+                            <div class="m-title">${escapeHTML(m.title)}</div>
+                            <div style="font-size:0.8rem; color:#64748B; margin-top:0.3rem">${escapeHTML(m.desc || '')}</div>
                         </div>
                     </div>
                 `;
@@ -547,7 +780,12 @@
                 let data = null;
                 
                 // Check if we already have the video data in history (caching)
-                const existing = history.find(v => "https://youtube.com/watch?v=" + v.id === ytInput || v.id === ytInput);
+                const wantedId = parseVideoId(ytInput);
+                if (!wantedId) throw new Error("That doesn't look like a YouTube link. Try a youtube.com/watch or youtu.be URL.");
+                const existing = history.find(v => v.id === wantedId);
+                if (!existing && history.length >= 20) {
+                    throw new Error("Storage full! Please delete an old chat from 'My Videos' before starting a new one.");
+                }
                 if (existing && existing.data) {
                     data = existing.data;
                 } else {
@@ -556,12 +794,15 @@
                     const res = await fetch('/api/process_youtube', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({url: ytInput})
+                        body: JSON.stringify({url: `https://www.youtube.com/watch?v=${wantedId}`})
                     });
                     data = await res.json();
                     if(data.error) throw new Error(data.error);
                 }
                 
+                currentVideoId = data.video_id;
+                currentVideoData = data;
+
                 // Update Video Player using YouTube IFrame API
                 document.querySelector('.video-player').innerHTML = '<div id="ytPlayerDiv" style="border-radius: 12px; width: 100%; height: 100%; min-height: 280px;"></div>';
                 
@@ -570,6 +811,7 @@
                 }
                 
                 // Set rel=0 and enablejsapi=1 are handled by YT API implicitly
+                await whenYTReady();
                 ytPlayer = new YT.Player('ytPlayerDiv', {
                     videoId: data.video_id,
                     playerVars: { 'autoplay': 0, 'rel': 0 },
@@ -599,7 +841,7 @@
                     .then(r => r.json())
                     .then(kmRes => {
                         data.key_moments = kmRes.key_moments;
-                        renderKeyMoments(data.key_moments);
+                        if (currentVideoId === data.video_id) renderKeyMoments(data.key_moments);
                         
                         // Update cache with key_moments
                         let historyArray = JSON.parse(localStorage.getItem('vidquery_history') || '[]');
@@ -608,7 +850,8 @@
                             historyArray[idx].data = data;
                             localStorage.setItem('vidquery_history', JSON.stringify(historyArray));
                         }
-                    });
+                    })
+                    .catch(() => { if (currentVideoId === data.video_id) renderKeyMoments([]); });
                 } else {
                     renderKeyMoments(data.key_moments);
                 }
@@ -616,27 +859,31 @@
                 // Save to History (initial cache without key_moments)
                 let historyArray = JSON.parse(localStorage.getItem('vidquery_history') || '[]');
                 
-                // Enforce 20 chat limit
-                if (!historyArray.some(v => v.id === data.video_id) && historyArray.length >= 20) {
-                    throw new Error("Storage full! Please delete an old chat from 'My Videos' before starting a new one.");
-                }
-                
                 historyArray = historyArray.filter(v => v.id !== data.video_id);
                 // Save the data object as well to cache the transcript and key moments!
                 historyArray.unshift({ id: data.video_id, title: data.video_title, timestamp: new Date().getTime(), data: data });
-                localStorage.setItem('vidquery_history', JSON.stringify(historyArray));
+                try {
+                    localStorage.setItem('vidquery_history', JSON.stringify(historyArray));
+                } catch (quotaErr) {
+                    // Browser storage full: keep the list but drop cached transcripts of older videos.
+                    historyArray.forEach((v, i) => { if (i > 0) delete v.data; });
+                    try { localStorage.setItem('vidquery_history', JSON.stringify(historyArray)); } catch (e) {}
+                }
                 
                 updateStorageUI();
                 
                 // Fetch Chat History from Supabase
                 loadChatHistory(data.video_id);
                 
-                showWorkspace(); // Switch back to workspace if not already
+                // Stay on Mind Map / Notes if that's where the video was opened from
+                if (document.getElementById('mindMapView').style.display !== 'none') showMindMap();
+                else if (document.getElementById('notesView').style.display !== 'none') showNotes();
+                else showWorkspace();
                 
             } catch (err) {
                 alert("Error: " + err.message);
-                // If it failed, clear the skeleton UI
-                document.querySelector('.video-header').innerText = "YouTube Video Analysis";
+                // If it failed, restore the previous video's header (or the default)
+                document.querySelector('.video-header').innerText = currentVideoData ? (currentVideoData.video_title || "YouTube Video Analysis") : "YouTube Video Analysis";
             } finally {
                 btn.innerText = oldText;
             }
@@ -666,50 +913,220 @@
             }
         }
         
-        function showWorkspace() {
-            document.getElementById('workspaceView').style.display = 'flex';
-            document.getElementById('myVideosView').style.display = 'none';
+        const VIEWS = ['workspaceView', 'myVideosView', 'mindMapView', 'notesView'];
+        function activateView(viewId, sideIndex) {
+            VIEWS.forEach(id => {
+                document.getElementById(id).style.display = id === viewId ? (id === 'workspaceView' ? 'flex' : 'block') : 'none';
+            });
             document.querySelectorAll('.side-item').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.side-item')[2].classList.add('active'); // Chat tab
+            document.querySelectorAll('.sidebar .side-nav')[0].querySelectorAll('.side-item')[sideIndex].classList.add('active');
+            if (viewId !== 'notesView') saveNotesNow();
+        }
+        function showWorkspace() {
+            activateView('workspaceView', 2); // Chat tab
         }
 
         function showMyVideos() {
-            document.getElementById('workspaceView').style.display = 'none';
-            document.getElementById('myVideosView').style.display = 'block';
-            document.querySelectorAll('.side-item').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.side-item')[1].classList.add('active'); // My Videos tab
-            
+            activateView('myVideosView', 1); // My Videos tab
+
             const history = JSON.parse(localStorage.getItem('vidquery_history') || '[]');
             const grid = document.getElementById('videoHistoryGrid');
             if (history.length === 0) {
                 grid.innerHTML = '<p style="color: #64748B; font-size: 1.1rem; grid-column: 1 / -1;">No chats saved yet. Import a video above to start!</p>';
                 return;
             }
-            
+
             let html = '';
             history.forEach(v => {
+                const id = escapeHTML(v.id), title = escapeHTML(v.title || 'Untitled video');
                 html += `
                     <div class="history-card" style="position: relative; background: white; border-radius: 12px; border: 1px solid #E2E8F0; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;">
                         <!-- Delete Button -->
-                        <div onclick="deleteHistoryItem('${v.id}')" style="position: absolute; top: 8px; right: 8px; z-index: 10; background: rgba(239, 68, 68, 0.9); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Delete Chat">
+                        <div onclick="deleteHistoryItem('${id}', event)" style="position: absolute; top: 8px; right: 8px; z-index: 10; background: rgba(239, 68, 68, 0.9); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Delete Chat">
                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
                         </div>
-                        
-                        <div onclick="loadVideoFromHistory('${v.id}')" style="cursor: pointer;">
+
+                        <div onclick="loadVideoFromHistory('${id}')" style="cursor: pointer;">
                             <div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #0F172A;">
-                                <img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" style="width: 100%; height: 100%; object-fit: cover;" alt="Thumbnail">
+                                <img src="https://img.youtube.com/vi/${id}/mqdefault.jpg" style="width: 100%; height: 100%; object-fit: cover;" alt="Thumbnail">
                                 <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;" class="play-overlay">
                                     <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M5 3l14 9-14 9V3z"/></svg>
                                 </div>
                             </div>
                             <div style="padding: 1rem;">
-                                <h3 style="font-size: 0.95rem; font-weight: 600; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0;" title="${v.title}">${v.title}</h3>
+                                <h3 style="font-size: 0.95rem; font-weight: 600; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0;" title="${title}">${title}</h3>
                             </div>
                         </div>
                     </div>
                 `;
             });
             grid.innerHTML = html;
+        }
+
+        function noVideoState(container, what) {
+            container.innerHTML = `
+                <div class="view-empty">
+                    <h3>No video open yet</h3>
+                    <p>Import a YouTube video (or pick one from My Videos) to see its ${what}.</p>
+                    <button class="view-btn primary" onclick="showWorkspace(); document.getElementById('ytInput').focus();">Import a video</button>
+                </div>`;
+        }
+
+        /* ---------------- Mind Map ---------------- */
+        const MM_COLORS = ['#4f46e5', '#0284c7', '#16a34a', '#ef4444', '#9333ea', '#f59e0b', '#0d9488', '#db2777'];
+        function showMindMap() {
+            activateView('mindMapView', 3);
+            const box = document.getElementById('mindMapContent');
+            document.getElementById('mindMapRegen').style.display = currentVideoId ? '' : 'none';
+            if (!currentVideoId) { noVideoState(box, 'mind map'); return; }
+            document.getElementById('mindMapSub').innerText = currentVideoData.video_title || 'See how the ideas in your video connect.';
+            loadMindMap(false);
+        }
+        async function loadMindMap(force) {
+            const data = currentVideoData, forId = currentVideoId;
+            const box = document.getElementById('mindMapContent');
+            if (!data) return;
+            if (data.mindmap && !force) { renderMindMap(data.mindmap); return; }
+            const btn = document.getElementById('mindMapRegen');
+            btn.disabled = true;
+            box.innerHTML = `
+                <div style="display:flex; justify-content:center; margin-bottom: 2rem;"><div class="skeleton-box" style="width: 320px; height: 56px; border-radius: 18px;"></div></div>
+                <div class="mm-branches" style="border-top-color: #E2E8F0;">
+                    ${Array.from({length: 6}, () => '<div class="skeleton-box" style="height: 170px; border-radius: 16px;"></div>').join('')}
+                </div>`;
+            try {
+                let transcriptText = '';
+                currentTranscript.forEach(t => { transcriptText += `[${fmtTime(t.start)}] ${t.text}\n`; });
+                const res = await fetch('/api/mindmap', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ video_id: forId, title: data.video_title || '', transcript_text: transcriptText })
+                });
+                const map = await res.json();
+                if (!res.ok || !Array.isArray(map.branches)) throw new Error('Bad response');
+                data.mindmap = map;
+                const historyArray = JSON.parse(localStorage.getItem('vidquery_history') || '[]');
+                const idx = historyArray.findIndex(v => v.id === forId);
+                if (idx !== -1) {
+                    historyArray[idx].data = data;
+                    try { localStorage.setItem('vidquery_history', JSON.stringify(historyArray)); } catch (e) {}
+                }
+                if (currentVideoId === forId) renderMindMap(map);
+            } catch (err) {
+                if (currentVideoId === forId) box.innerHTML = '<div class="view-empty"><h3>Couldn\'t build the mind map</h3><p>Please try Regenerate in a moment.</p></div>';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+        function mmTimeAttr(time) {
+            return time ? `onclick="openAt('${escapeHTML(time)}')"` : '';
+        }
+        function renderMindMap(map) {
+            const branches = (map.branches || []).filter(b => b && b.title);
+            let html = `<div class="mm-root-wrap"><div class="mm-root">${escapeHTML(map.title || currentVideoData.video_title || 'This video')}</div></div>
+                <div class="mm-branches">`;
+            branches.forEach((b, i) => {
+                const color = MM_COLORS[i % MM_COLORS.length];
+                html += `
+                    <div class="mm-branch" style="animation-delay: ${0.08 * i + 0.1}s;">
+                        <button type="button" class="mm-main" ${mmTimeAttr(b.time)}>
+                            <span class="mm-dot" style="background: ${color}; box-shadow: 0 4px 12px ${color}55;">${i + 1}</span>
+                            <span class="mm-main-title">${escapeHTML(b.title)}</span>
+                            ${b.time ? `<span class="mm-time">${escapeHTML(b.time)}</span>` : ''}
+                        </button>
+                        <div class="mm-children">
+                            ${(b.children || []).filter(c => c && c.title).map(c => `
+                                <button type="button" class="mm-child" ${mmTimeAttr(c.time)}>
+                                    <span>${escapeHTML(c.title)}</span>
+                                    ${c.time ? `<span class="mm-time">${escapeHTML(c.time)}</span>` : ''}
+                                </button>`).join('')}
+                        </div>
+                    </div>`;
+            });
+            html += '</div>';
+            if (map.source === 'offline') {
+                html += '<div style="text-align:center;"><span class="mm-source">⚡ Built offline from the transcript. Regenerate when the AI is back for a richer map.</span></div>';
+            }
+            document.getElementById('mindMapContent').innerHTML = html;
+        }
+        // Jump from Mind Map / Notes back to the player at a timestamp
+        function openAt(timeStr) {
+            showWorkspace();
+            seekToTimeStr(timeStr);
+        }
+
+        /* ---------------- Notes ---------------- */
+        let notesTimer = null;
+        function showNotes() {
+            activateView('notesView', 4);
+            const box = document.getElementById('notesContent');
+            document.getElementById('notesSaved').innerText = '';
+            if (!currentVideoId) { noVideoState(box, 'notes'); return; }
+            document.getElementById('notesSub').innerText = 'Saved automatically. Use “Insert timestamp” to mark the current moment.';
+            box.innerHTML = `
+                <div class="notes-card">
+                    <div class="notes-card-head">
+                        <img src="https://img.youtube.com/vi/${escapeHTML(currentVideoId)}/mqdefault.jpg" alt="">
+                        <b title="${escapeHTML(currentVideoData.video_title || '')}">${escapeHTML(currentVideoData.video_title || 'Untitled video')}</b>
+                    </div>
+                    <textarea id="notesArea" class="notes-area" placeholder="Start typing your notes…&#10;&#10;Tip: click “Save to Notes” under any AI answer in Chat to collect it here."></textarea>
+                </div>`;
+            const area = document.getElementById('notesArea');
+            area.value = readMap(NOTES_KEY)[currentVideoId] || '';
+            area.addEventListener('input', () => {
+                document.getElementById('notesSaved').innerText = 'Saving…';
+                clearTimeout(notesTimer);
+                notesTimer = setTimeout(saveNotesNow, 400);
+            });
+            area.focus();
+        }
+        function saveNotesNow() {
+            const area = document.getElementById('notesArea');
+            if (!area || !currentVideoId) return;
+            clearTimeout(notesTimer);
+            const notes = readMap(NOTES_KEY);
+            notes[currentVideoId] = area.value;
+            const ok = writeMap(NOTES_KEY, notes);
+            const label = document.getElementById('notesSaved');
+            if (label) label.innerText = ok ? '✓ Saved' : 'Storage full';
+        }
+        function appendToNotes(text) {
+            if (!currentVideoId) return;
+            const notes = readMap(NOTES_KEY);
+            const existing = (notes[currentVideoId] || '').replace(/\s*$/, '');
+            notes[currentVideoId] = (existing ? existing + '\n\n' : '') + text.trim() + '\n';
+            writeMap(NOTES_KEY, notes);
+            const area = document.getElementById('notesArea');
+            if (area) area.value = notes[currentVideoId];
+        }
+        function insertNoteTimestamp() {
+            const area = document.getElementById('notesArea');
+            if (!area) { showToast('🎬 Import a video first'); return; }
+            const t = (ytPlayer && ytPlayer.getCurrentTime) ? ytPlayer.getCurrentTime() : 0;
+            const stamp = `[${fmtTime(t)}] `;
+            const at = area.selectionStart ?? area.value.length;
+            const before = area.value.slice(0, at);
+            const prefix = before && !before.endsWith('\n') ? '\n' : '';
+            area.value = before + prefix + stamp + area.value.slice(area.selectionEnd ?? at);
+            const pos = (before + prefix + stamp).length;
+            area.focus();
+            area.setSelectionRange(pos, pos);
+            saveNotesNow();
+        }
+        function exportNotes() {
+            if (!currentVideoId) { showToast('🎬 Import a video first'); return; }
+            saveNotesNow();
+            const text = (readMap(NOTES_KEY)[currentVideoId] || '').trim();
+            if (!text) { showToast('📝 Your notes are empty', 'Write something or save an AI answer first.'); return; }
+            const title = currentVideoData.video_title || 'VidQuery notes';
+            const md = `# ${title}\n\nhttps://youtu.be/${currentVideoId}\n\n${text}\n`;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([md], {type: 'text/markdown'}));
+            a.download = (title.replace(/[^\w\- ]+/g, '').trim().slice(0, 60) || 'notes') + '.md';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
         }
 
         function loadVideoFromHistory(id) {
@@ -741,9 +1158,9 @@
                 // Show up to 10 most recent chats in the sidebar
                 history.slice(0, 10).forEach(v => {
                     listHtml += `
-                        <a href="#" class="side-item" onclick="loadVideoFromHistory('${v.id}')" title="${v.title}">
+                        <a href="#" class="side-item" onclick="loadVideoFromHistory('${escapeHTML(v.id)}'); return false;" title="${escapeHTML(v.title)}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 
-                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; display: inline-block; vertical-align: bottom;">${v.title}</span>
+                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; display: inline-block; vertical-align: bottom;">${escapeHTML(v.title)}</span>
                         </a>
                     `;
                 });
@@ -751,16 +1168,19 @@
             }
         }
         
-        function deleteHistoryItem(id) {
-            event.stopPropagation(); // prevent card click
+        function deleteHistoryItem(id, evt) {
+            if (evt) evt.stopPropagation(); // prevent card click
+            if (!confirm('Delete this video along with its chat and notes?')) return;
             let history = JSON.parse(localStorage.getItem('vidquery_history') || '[]');
             history = history.filter(v => v.id !== id);
             localStorage.setItem('vidquery_history', JSON.stringify(history));
+            const chats = readMap(CHATS_KEY); delete chats[id]; writeMap(CHATS_KEY, chats);
+            const notes = readMap(NOTES_KEY); delete notes[id]; writeMap(NOTES_KEY, notes);
             showMyVideos(); // refresh UI
             updateStorageUI();
-            showToast("Chat deleted successfully.");
+            showToast("🗑️ Chat deleted successfully.");
         }
-        
+
         window.addEventListener('load', () => {
             updateStorageUI();
         });
@@ -805,7 +1225,7 @@
                 const mins = Math.floor(t.start / 60);
                 const secs = Math.floor(t.start % 60).toString().padStart(2, '0');
                 
-                let displayText = t.text;
+                let displayText = escapeHTML(t.text);
                 if (currentQuery !== '') {
                     const safeQuery = currentQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                     const regex = new RegExp(`(${safeQuery})`, "gi");

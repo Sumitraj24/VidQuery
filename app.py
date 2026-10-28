@@ -30,98 +30,96 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
-# Helper function to handle API fallbacks automatically
+import time
+import study_offline
+
+# When the gateway refuses connections we skip it for a short while instead of
+# making every request wait through all candidate models.
+_llm_down_until = 0.0
+LLM_COOLDOWN_SECONDS = 30
+
+def llm_base_url():
+    return os.environ.get("FREELLMAPI_BASE_URL", "http://127.0.0.1:31415/v1").rstrip("/")
+
+# Helper function to generate AI responses using FreeLLMAPI
 def generate_ai_response(user_prompt: str, system_prompt: str = None, json_mode: bool = False):
-    import json
-    from openai import OpenAI
+    global _llm_down_until
+    from openai import OpenAI, APIConnectionError
     import httpx
-    import requests
-    
+
+    if time.time() < _llm_down_until:
+        raise Exception("FreeLLMAPI gateway marked unreachable; skipping")
+
+    base_url = llm_base_url()
+    api_key = os.environ.get("FREELLMAPI_API_KEY", "")
+    preferred_model = os.environ.get("FREELLMAPI_MODEL", "auto")
+
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": user_prompt})
-    
+
     kwargs = {}
     if json_mode:
         kwargs["response_format"] = {"type": "json_object"}
-        
-    # Attempt 1: Groq API (Fastest)
-    try:
-        print("Attempting Groq API...")
-        groq_client = OpenAI(
-            base_url="https://api.groq.com/openai/v1",
-            api_key=os.environ.get("GROQ_API_KEY", ""),
-            http_client=httpx.Client(verify=False)
-        )
-        kwargs_groq = kwargs.copy()
-        kwargs_groq["max_tokens"] = 800  # Prevent Groq 1000 OTPM limit error
-        
-        completion = groq_client.chat.completions.create(
-            model="qwen/qwen3.8-27b",
-            messages=messages,
-            **kwargs_groq
-        )
-        print("Groq API Success!")
-        return completion.choices[0].message.content.strip()
-    except Exception as e:
-        print(f"Groq API Failed: {e}. Falling back to OpenRouter...")
-        
-    # Attempt 2: OpenRouter API (Auto-Router Fallback)
-    try:
-        print("Attempting OpenRouter API...")
-        or_client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=os.environ.get("OPENROUTER_API_KEY", ""),
-            http_client=httpx.Client(verify=False)
-        )
-        completion = or_client.chat.completions.create(
-            model="openrouter/free",
-            messages=messages,
-            **kwargs
-        )
-        print("OpenRouter API Success!")
-        return completion.choices[0].message.content.strip()
-    except Exception as e:
-        print(f"OpenRouter API Failed: {e}. Falling back to Gemini...")
-        
-    # Attempt 3: Gemini API (Final Fallback)
-    try:
-        print("Attempting Gemini API...")
-        api_key = os.environ.get("GEMINI_API_KEY", "")
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-        headers = {'Content-Type': 'application/json'}
-        
-        # Convert messages to Gemini format
-        gemini_contents = []
-        for msg in messages:
-            gemini_contents.append({"role": "user" if msg["role"] == "user" else "model", "parts": [{"text": msg["content"]}]})
-            
-        data = {"contents": gemini_contents}
-        if json_mode:
-            data["generationConfig"] = {"responseMimeType": "application/json"}
-            
-        response = requests.post(url, headers=headers, json=data, verify=False)
-        response.raise_for_status()
-        res_json = response.json()
-        print("Gemini API Success!")
-        return res_json["candidates"][0]["content"]["parts"][0]["text"].strip()
-    except Exception as e:
-        print(f"Gemini API Failed: {e}.")
-        
-    raise Exception("All configured AI APIs failed or hit limits.")
+
+    # Try preferred model first, then solid fallbacks from FreeLLMAPI if needed
+    candidate_models = [preferred_model]
+    for fallback in ["auto", "gemini-flash", "fusion", "gemini-3.8-flash"]:
+        if fallback not in candidate_models:
+            candidate_models.append(fallback)
+
+    last_error = None
+    client = OpenAI(
+        base_url=base_url,
+        api_key=api_key,
+        http_client=httpx.Client(verify=False),
+        timeout=90,
+        max_retries=0,
+    )
+
+    for model_name in candidate_models:
+        try:
+            print(f"Attempting FreeLLMAPI (model='{model_name}')...")
+            completion = client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+                **kwargs
+            )
+            content = completion.choices[0].message.content
+            if content:
+                print(f"FreeLLMAPI Success with model '{model_name}'!")
+                return content.strip()
+        except APIConnectionError as e:
+            print(f"FreeLLMAPI unreachable at {base_url}: {e}")
+            _llm_down_until = time.time() + LLM_COOLDOWN_SECONDS
+            raise
+        except Exception as e:
+            print(f"FreeLLMAPI attempt with model '{model_name}' failed: {e}")
+            last_error = e
+
+    raise Exception(f"FreeLLMAPI request failed across all candidate models: {last_error}")
 
 def parse_llm_json(text: str):
     """Safely extracts and parses JSON from LLM output, handling markdown code fences."""
+    import re
     text = text.strip()
-    if text.startswith("```"):
-        lines = text.split("\n")
-        if lines and lines[0].startswith("```"):
-            lines = lines[1:]
-        if lines and lines[-1].strip().startswith("```"):
-            lines = lines[:-1]
-        text = "\n".join(lines).strip()
-    return json.loads(text)
+    if "```" in text:
+        match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text)
+        if match:
+            text = match.group(1).strip()
+    try:
+        return json.loads(text)
+    except Exception:
+        start = text.find("{")
+        end = text.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            return json.loads(text[start:end+1])
+        start_list = text.find("[")
+        end_list = text.rfind("]")
+        if start_list != -1 and end_list != -1 and end_list > start_list:
+            return json.loads(text[start_list:end_list+1])
+        raise
 
 # Initialize Supabase (requires SUPABASE_URL and SUPABASE_KEY in .env)
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
@@ -130,8 +128,28 @@ supabase: Client = None
 if SUPABASE_URL and SUPABASE_KEY:
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# Demo User configuration
+DEMO_EMAIL = os.environ.get("DEMO_EMAIL", "demo@vidquery.com").strip().lower()
+DEMO_PASSWORDS = {"demo123", "demopassword123", "demo1234", "demo", os.environ.get("DEMO_PASSWORD", "demo123").strip()}
+DEMO_EMAILS = {DEMO_EMAIL, "demo@vidquery.com", "demo@test.com", "demo@example.com"}
+
+class DemoUserState:
+    def __init__(self):
+        self.id = "demo-user-vidquery"
+        self.email = "demo@vidquery.com"
+        self.user_metadata = {
+            "full_name": "Demo Scholar",
+            "institution_category": "University",
+            "education_level": "University",
+            "phone": "+1 (555) 019-2834"
+        }
+
+DEMO_USER = DemoUserState()
+
 def get_current_user(request: Request):
     token = request.cookies.get("access_token")
+    if token in ("demo_access_token", "dummy_token"):
+        return DEMO_USER
     if not supabase:
         return None
     if token:
@@ -157,10 +175,17 @@ async def login_get(request: Request):
 
 @app.post("/login", response_class=HTMLResponse)
 async def login_post(request: Request, response: Response, email: str = Form(...), password: str = Form(...)):
+    normalized_email = email.strip().lower()
+    cleaned_password = password.strip()
 
+    # Check for demo login credentials
+    if normalized_email in DEMO_EMAILS and cleaned_password in DEMO_PASSWORDS:
+        redirect_res = RedirectResponse(url="/dashboard?welcome=true", status_code=303)
+        redirect_res.set_cookie("access_token", "demo_access_token", httponly=True)
+        return redirect_res
 
     if not supabase:
-        return templates.TemplateResponse(request, "home.html", {"request": request, "error": "Supabase not configured.", "show_modal": "login"})
+        return templates.TemplateResponse(request, "home.html", {"request": request, "error": "Supabase not configured. Use demo account (demo@vidquery.com / demo123).", "show_modal": "login"})
     try:
         auth_res = supabase.auth.sign_in_with_password({"email": email, "password": password})
         if auth_res.session:
@@ -168,7 +193,7 @@ async def login_post(request: Request, response: Response, email: str = Form(...
             redirect_res = RedirectResponse(url="/dashboard?welcome=true", status_code=303)
             redirect_res.set_cookie("access_token", token, httponly=True)
             return redirect_res
-        return templates.TemplateResponse(request, "home.html", {"request": request, "error": "Login failed.", "show_modal": "login"})
+        return templates.TemplateResponse(request, "home.html", {"request": request, "error": "Invalid email or password.", "show_modal": "login"})
     except Exception as e:
         return templates.TemplateResponse(request, "home.html", {"request": request, "error": str(e), "show_modal": "login"})
 
@@ -249,7 +274,20 @@ async def logout_post(request: Request):
 async def profile_update(request: Request, full_name: str = Form(""), institution_category: str = Form(""), phone: str = Form("")):
     token = request.cookies.get("access_token")
     
-    if not token or not supabase:
+    if not token:
+        return RedirectResponse(url="/?show_modal=login", status_code=303)
+
+    if token in ("demo_access_token", "dummy_token"):
+        if full_name:
+            DEMO_USER.user_metadata["full_name"] = full_name
+        if institution_category:
+            DEMO_USER.user_metadata["institution_category"] = institution_category
+            DEMO_USER.user_metadata["education_level"] = institution_category
+        if phone:
+            DEMO_USER.user_metadata["phone"] = phone
+        return RedirectResponse(url="/profile?updated=true", status_code=303)
+        
+    if not supabase:
         return RedirectResponse(url="/?show_modal=login", status_code=303)
         
     try:
@@ -280,6 +318,13 @@ class YTRequest(BaseModel):
 class ChatRequest(BaseModel):
     query: str
     video_id: str
+    transcript_text: str
+    mode: str = "chat"  # chat | summary | notes | qa
+    language: str = "auto"  # auto | english | hinglish
+
+class MindMapRequest(BaseModel):
+    video_id: str
+    title: str = ""
     transcript_text: str
 
 class KeyMomentsRequest(BaseModel):
@@ -426,7 +471,7 @@ def generate_key_moments(req: KeyMomentsRequest):
     }}
     
     Transcript snippet (first 30000 chars):
-    {req.raw_text}
+    {req.raw_text[:30000]}
     """
     
     try:
@@ -439,14 +484,50 @@ def generate_key_moments(req: KeyMomentsRequest):
         else:
             key_moments = []
         if not key_moments:
-            key_moments = [{"time": "00:00", "title": "Introduction", "desc": "Video begins."}]
+            raise ValueError("LLM returned no key moments")
+        source = "ai"
     except Exception as api_err:
-        print("All AI APIs failed:", api_err)
-        key_moments = [
-            {"time": "00:00", "title": "Introduction", "desc": "Video begins."}
-        ]
-        
-    return {"key_moments": key_moments}
+        print("Key moments falling back to offline mode:", api_err)
+        key_moments = study_offline.key_moments(study_offline.parse_transcript(req.raw_text))
+        source = "offline"
+
+    return {"key_moments": key_moments, "source": source}
+
+@app.get("/api/status")
+def ai_status():
+    """Lets the UI tell students whether answers come from the AI or offline transcript search."""
+    try:
+        r = httpx.get(llm_base_url() + "/models", timeout=3)
+        online = r.status_code < 500
+    except Exception:
+        online = False
+    return {"ai": online}
+
+@app.post("/api/mindmap")
+def generate_mindmap(req: MindMapRequest):
+    prompt = f"""Build a study mind map of this lecture transcript.
+Return ONLY valid JSON in this exact structure (4 to 7 branches, 2 to 4 children each, short titles):
+{{
+  "title": "Central topic",
+  "branches": [
+    {{"title": "Main idea", "time": "MM:SS", "children": [{{"title": "Sub-idea", "time": "MM:SS"}}]}}
+  ]
+}}
+Use times from the transcript where each idea is explained.
+
+Transcript:
+{req.transcript_text[:30000]}
+"""
+    try:
+        parsed = parse_llm_json(generate_ai_response(prompt, json_mode=True))
+        if not isinstance(parsed, dict) or not parsed.get("branches"):
+            raise ValueError("LLM returned no branches")
+        parsed.setdefault("title", req.title or "This video")
+        return {**parsed, "source": "ai"}
+    except Exception as api_err:
+        print("Mind map falling back to offline mode:", api_err)
+        data = study_offline.mindmap(study_offline.parse_transcript(req.transcript_text), req.title)
+        return {**data, "source": "offline"}
 @app.get("/health")
 async def health():
     return {"status": "VidQuery is running"}
@@ -457,7 +538,34 @@ def chat_with_video(req: ChatRequest, request: Request):
     user = get_current_user(request)
     if user:
         user_id = user.id
-    system_prompt = f"""You are VidQuery, an AI study assistant.
+    language = study_offline.resolve_language(req.language, req.query)
+    language_rule = {
+        "english": "Write the \"answer\" in clear, simple English.",
+        "hinglish": (
+            "Write the \"answer\" in Hinglish: friendly conversational Hindi written ONLY in Roman (English) letters, "
+            "mixed naturally with English, the way Indian students talk. Keep technical terms in English. "
+            "Example: \"Sigmoid function ek squishing function hai jo kisi bhi number ko 0 aur 1 ke beech le aata hai.\" "
+            "Never use Devanagari script. This applies to EVERYTHING you write: questions, answers, headings and bullets. "
+            "Example question: \"**Q1.** Input layer mein kitne neurons hote hain?\""
+        ),
+    }[language]
+    mode_rule = {
+        "summary": "TASK: a crisp summary. Start with a 1-line 🎯 gist, then 4-6 sections as '### emoji Title' each with 2-3 short bullets and a [MM:SS] timestamp. End with a '✅ Key takeaway' line.",
+        "notes": "TASK: exam-ready study notes. Use '### emoji Topic' headings with short bullets; put definitions as '**Term**: meaning'. Include formulas if any. Add [MM:SS] timestamps. End with '📝 Quick revision' (3 bullets).",
+        "qa": "TASK: 5 practice questions. Format each as '**Q1.** question' on one line, then '✅ **Answer:** answer in at most 2 short lines [MM:SS]'. No extra notes after answers. Mix easy and tricky questions. Leave a blank line between questions.",
+    }.get(req.mode, "TASK: answer the student's question directly. Usually 40-120 words.")
+    system_prompt = f"""You are VidQuery, a friendly, expert AI study assistant for students.
+LANGUAGE: {language_rule} Citation titles may stay in English.
+
+STYLE (write like ChatGPT at its best: accurate, to the point, engaging):
+- Lead with the direct answer in 1-2 short sentences. No filler, no restating the question, no "Great question!".
+- Then, only if useful, 2-5 crisp bullet points ("- ") with **bold** key terms.
+- Keep paragraphs to 1-2 sentences. Use line breaks (\\n) between paragraphs and bullets.
+- Use a few relevant emojis (like 💡 🎯 ✅ 📌 🧠 ⚡) to make it lively, about one per paragraph or heading, never one on every bullet.
+- Add [MM:SS] timestamps from the transcript next to the points they support.
+- Be precise: use only facts from the transcript; never invent details. If the video doesn't cover it, say so in one line.
+- For a simple greeting, reply in one or two friendly lines.
+{mode_rule}
 You can answer general conversational questions (like "hi", "how are you", "what can you do") normally and politely.
 If the user asks about the video, answer their question based ONLY on the following transcript with timestamps:
 
@@ -465,7 +573,7 @@ If the user asks about the video, answer their question based ONLY on the follow
 
 Return your response strictly in valid JSON format:
 {{
-    "answer": "Your detailed answer here...",
+    "answer": "Markdown answer that follows the STYLE rules, with \\n line breaks",
     "citation": {{
         "start_time": "18:27",
         "end_time": "21:03",
@@ -473,33 +581,46 @@ Return your response strictly in valid JSON format:
     }}
 }}
 If no specific citation is relevant (for example, if it's a general greeting), set citation to null. Do not include markdown blocks like ```json.
+
+REMEMBER THE LANGUAGE: {language_rule}
 """
+    # Repeat the language on the message itself; models follow it far more reliably there.
+    user_message = f"{req.query}\n\n(Reply language: {'Hinglish, in Roman script' if language == 'hinglish' else 'English'})"
     try:
-        res_text = generate_ai_response(req.query, system_prompt=system_prompt, json_mode=True)
+        res_text = generate_ai_response(user_message, system_prompt=system_prompt, json_mode=True)
         response_data = parse_llm_json(res_text)
+        if not isinstance(response_data, dict):
+            response_data = {"answer": response_data, "citation": None}
+        response_data["source"] = "ai"
         
         # Save to Supabase Chat History
-        if supabase and user_id:
+        if supabase and user_id and user_id != DEMO_USER.id:
             try:
                 # Use JWT to bypass RLS for this user
                 token = request.cookies.get("access_token")
                 if token and token != "dummy_token":
                     supabase.auth.set_session(token, "dummy")
                 
-                # We assume a chat_history table with these standard columns
                 supabase.table("chat_history").insert({
                     "user_id": user_id,
                     "video_id": req.video_id,
-                    "query": req.query,
-                    "response": json.dumps(response_data)
+                    "user_message": req.query,
+                    "ai_response": json.dumps(response_data)
                 }).execute()
             except Exception as db_err:
                 print(f"Supabase Chat Save Error (table might not be configured correctly): {db_err}")
                 
         return response_data
     except Exception as e:
-        print(f"Chat API Error (All fallbacks failed): {e}")
-        return {"answer": "I'm sorry, I couldn't process that request right now.", "citation": None}
+        print(f"Chat falling back to offline mode: {e}")
+        transcript = study_offline.parse_transcript(req.transcript_text)
+        if not transcript:
+            return {"answer": "Import a video first, then ask me anything about it.", "citation": None, "source": "offline"}
+        handlers = {"summary": study_offline.summary, "notes": study_offline.notes, "qa": study_offline.quiz}
+        handler = handlers.get(req.mode)
+        response_data = handler(transcript, language) if handler else study_offline.answer(req.query, transcript, language)
+        response_data["source"] = "offline"
+        return response_data
 
 @app.get("/api/history/{video_id}")
 def get_chat_history(video_id: str, request: Request):
@@ -508,16 +629,17 @@ def get_chat_history(video_id: str, request: Request):
     if user:
         user_id = user.id
         
-    if not supabase:
+    if not supabase or not user_id or user_id == DEMO_USER.id:
         return {"history": []}
-        
+
     try:
         token = request.cookies.get("access_token")
         if token and token != "dummy_token":
             supabase.auth.set_session(token, "dummy")
             
         res = supabase.table("chat_history").select("*").eq("video_id", video_id).eq("user_id", user_id).order("created_at").execute()
-        return {"history": res.data}
+        history = [{"query": row.get("user_message", ""), "response": row.get("ai_response", "")} for row in res.data]
+        return {"history": history}
     except Exception as e:
         print(f"Failed to fetch history: {e}")
         return {"history": []}

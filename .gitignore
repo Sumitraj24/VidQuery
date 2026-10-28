@@ -25,6 +25,7 @@ transcript.txt
 .DS_Store
 .vscode/
 .idea/
+.claude/
 
 # Deployment & Vercel
 .vercel/
