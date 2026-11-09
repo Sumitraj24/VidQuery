@@ -49,7 +49,7 @@ import threading
 # this gateway: first token in ~1s). "auto" is kept last because it sometimes routes
 # to providers that take 15-60s. Override with FREELLMAPI_FAST_MODELS in .env.
 FAST_MODELS = [m.strip() for m in os.environ.get(
-    "FREELLMAPI_FAST_MODELS", "claude-haiku-4-5,gemini-flash-lite,gemini-3.5-flash-lite,auto"
+    "FREELLMAPI_FAST_MODELS", "openai/gpt-oss-120b,openai/gpt-oss-20b,auto"
 ).split(",") if m.strip()]
 # If a model hasn't produced its first token by then, race the next one in parallel.
 HEDGE_SECONDS = float(os.environ.get("FREELLMAPI_HEDGE_SECONDS", "3.5"))

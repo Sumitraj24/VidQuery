@@ -12,10 +12,10 @@ services:
       - key: FREELLMAPI_API_KEY
         sync: false
       - key: FREELLMAPI_MODEL
-        value: llama-3.3-70b-versatile
+        value: openai/gpt-oss-120b
       - key: FREELLMAPI_FAST_MODELS
-        value: llama-3.3-70b-versatile,llama-3.1-8b-instant
+        value: openai/gpt-oss-120b,openai/gpt-oss-20b
       - key: SUPABASE_URL
-        sync: false
+        value: https://abqffxkloinpsccxgsyz.supabase.co
       - key: SUPABASE_KEY
-        sync: false
+        value: sb_publishable_82C01-tAL3KLCW4DFNsFXw_Mf_0a-UG
