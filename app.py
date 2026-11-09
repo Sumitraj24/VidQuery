@@ -682,20 +682,19 @@ def process_youtube(req: YTRequest):
         
     # If client/extension already extracted captions directly in browser, use them immediately!
     if req.transcript:
-        raw_text = ""
+        lines_list = []
         transcript_data = []
         for t in req.transcript:
             start_sec = float(t.get('start', 0.0) if isinstance(t, dict) else getattr(t, 'start', 0.0))
             text_content = str(t.get('text', '') if isinstance(t, dict) else getattr(t, 'text', ''))
-            raw_text += f"[{start_sec:.1f}s] {text_content}
-"
+            lines_list.append(f"[{start_sec:.1f}s] {text_content}")
             transcript_data.append({"start": start_sec, "text": text_content})
         return {
             "success": True,
             "video_id": video_id,
             "video_title": "YouTube Video Analysis",
             "transcript": transcript_data,
-            "raw_text": raw_text,
+            "raw_text": chr(10).join(lines_list),
             "key_moments": None
         }
         
