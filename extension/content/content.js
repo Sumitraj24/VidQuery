@@ -306,34 +306,67 @@
 
   async function fetchCaptions() {
     const info = await captionTracks();
-    if (!info || info.videoId !== state.videoId || !info.tracks?.length) return null;
+    if (!info || !info.tracks?.length) return null;
     const tracks = info.tracks;
     const pick =
       tracks.find((t) => t.lang?.startsWith('en') && t.kind !== 'asr') ||
       tracks.find((t) => t.lang?.startsWith('en')) ||
       tracks.find((t) => t.lang === 'hi') ||
       tracks[0];
-    let url = pick.baseUrl + '&fmt=json3';
-    if (!pick.lang?.startsWith('en')) url += '&tlang=en';
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 3500);
-    try {
-      const res = await fetch(url, { signal: ctrl.signal, credentials: 'include' });
-      const body = await res.text();
-      if (!res.ok || !body) return null;
-      const data = JSON.parse(body);
-      const out = [];
-      for (const ev of data.events || []) {
-        if (!ev.segs) continue;
-        const text = ev.segs.map((s) => s.utf8 || '').join('').replace(/\s+/g, ' ').trim();
-        if (text) out.push({ start: (ev.tStartMs || 0) / 1000, text });
+    if (!pick?.baseUrl) return null;
+
+    // Helper to try fetching a caption url
+    async function tryFetch(url) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 6000);
+      try {
+        const res = await fetch(url, { signal: ctrl.signal, credentials: 'include' });
+        const body = await res.text();
+        if (!res.ok || !body) return null;
+        
+        // 1. Try parsing JSON format (json3)
+        try {
+          const data = JSON.parse(body);
+          const out = [];
+          for (const ev of data.events || []) {
+            if (!ev.segs) continue;
+            const text = ev.segs.map((s) => s.utf8 || '').join('').replace(/\s+/g, ' ').trim();
+            if (text) out.push({ start: (ev.tStartMs || 0) / 1000, text });
+          }
+          if (out.length) return out;
+        } catch (je) {}
+
+        // 2. Try parsing XML format (standard YouTube timed text)
+        try {
+          const parser = new DOMParser();
+          const xml = parser.parseFromString(body, 'text/xml');
+          const nodes = xml.querySelectorAll('text');
+          if (nodes && nodes.length) {
+            const out = [];
+            nodes.forEach((n) => {
+              const text = (n.textContent || '').replace(/\s+/g, ' ').trim();
+              const start = parseFloat(n.getAttribute('start') || '0');
+              if (text) out.push({ start, text });
+            });
+            if (out.length) return out;
+          }
+        } catch (xe) {}
+        return null;
+      } catch (e) {
+        return null;
+      } finally {
+        clearTimeout(timer);
       }
-      return out.length ? out : null;
-    } catch (e) {
-      return null;
-    } finally {
-      clearTimeout(timer);
     }
+
+    // Try json3 first
+    let url = pick.baseUrl + (pick.baseUrl.includes('?') ? '&' : '?') + 'fmt=json3';
+    let res = await tryFetch(url);
+    if (res) return res;
+
+    // Fallback: try raw baseUrl (XML)
+    res = await tryFetch(pick.baseUrl);
+    return res;
   }
 
   // ---------------------------------------------------------------- messages
