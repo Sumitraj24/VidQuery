@@ -1,3 +1,4 @@
+from typing import Optional, List
 import os
 import json
 import urllib.request
@@ -391,6 +392,7 @@ import html
 
 class YTRequest(BaseModel):
     url: str
+    transcript: Optional[list] = None
 
 class ChatRequest(BaseModel):
     query: str
@@ -677,6 +679,25 @@ def process_youtube(req: YTRequest):
     video_id = extract_video_id(req.url)
     if not video_id:
         return {"error": "Invalid YouTube URL"}
+        
+    # If client/extension already extracted captions directly in browser, use them immediately!
+    if req.transcript:
+        raw_text = ""
+        transcript_data = []
+        for t in req.transcript:
+            start_sec = float(t.get('start', 0.0) if isinstance(t, dict) else getattr(t, 'start', 0.0))
+            text_content = str(t.get('text', '') if isinstance(t, dict) else getattr(t, 'text', ''))
+            raw_text += f"[{start_sec:.1f}s] {text_content}
+"
+            transcript_data.append({"start": start_sec, "text": text_content})
+        return {
+            "success": True,
+            "video_id": video_id,
+            "video_title": "YouTube Video Analysis",
+            "transcript": transcript_data,
+            "raw_text": raw_text,
+            "key_moments": None
+        }
         
     video_title = "YouTube Video Analysis"
     try:
