@@ -214,7 +214,7 @@ async function loadVideo(id, titleHint) {
     if (fast.source !== 'ai') upgradeMoments(token);
   } catch (err) {
     if (token !== S.loadToken) return;
-    if (err instanceof ApiError && err.offline) {
+    if (err instanceof ApiError && (err.offline || err.status >= 502)) {
       showServerOff();
       return;
     }

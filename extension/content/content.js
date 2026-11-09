@@ -290,28 +290,46 @@
   // chosen track as JSON. Returns null when YouTube refuses (the server then
   // fetches the transcript instead).
   function captionTracks() {
-    return new Promise((resolve) => {
-      const id = Math.random().toString(36).slice(2);
-      const timer = setTimeout(() => { window.removeEventListener('message', onMsg); resolve(null); }, 1500);
-      function onMsg(e) {
-        if (e.source !== window || e.data?.source !== 'vq-bridge' || e.data.id !== id) return;
-        clearTimeout(timer);
-        window.removeEventListener('message', onMsg);
-        resolve(e.data);
+    // Single attempt to get caption tracks from the page bridge.
+    function attempt(timeout) {
+      return new Promise((resolve) => {
+        const id = Math.random().toString(36).slice(2);
+        const timer = setTimeout(() => { window.removeEventListener('message', onMsg); resolve(null); }, timeout);
+        function onMsg(e) {
+          if (e.source !== window || e.data?.source !== 'vq-bridge' || e.data.id !== id) return;
+          clearTimeout(timer);
+          window.removeEventListener('message', onMsg);
+          resolve(e.data);
+        }
+        window.addEventListener('message', onMsg);
+        window.postMessage({ source: 'vq-content', type: 'getCaptionTracks', id }, location.origin);
+      });
+    }
+
+    // Retry up to 3 times with increasing timeouts. YouTube's SPA navigation
+    // sometimes delays the player response, so a short retry loop catches it.
+    return (async () => {
+      for (const ms of [2000, 3000, 4000]) {
+        const info = await attempt(ms);
+        if (info?.tracks?.length) return info;
       }
-      window.addEventListener('message', onMsg);
-      window.postMessage({ source: 'vq-content', type: 'getCaptionTracks', id }, location.origin);
-    });
+      return null;
+    })();
   }
 
   async function fetchCaptions() {
-    const info = await captionTracks();
+    let info = await captionTracks();
+    if (!info || !info.tracks?.length) {
+      // Wait a moment for the player to fully initialize, then try once more.
+      await new Promise((r) => setTimeout(r, 1500));
+      info = await captionTracks();
+    }
     if (!info || !info.tracks?.length) return null;
     const tracks = info.tracks;
     const pick =
-      tracks.find((t) => t.lang?.startsWith('en') && t.kind !== 'asr') ||
-      tracks.find((t) => t.lang?.startsWith('en')) ||
-      tracks.find((t) => t.lang === 'hi') ||
+      tracks.find((t) => t.lang?.toLowerCase().startsWith('en') && t.kind !== 'asr') ||
+      tracks.find((t) => t.lang?.toLowerCase().startsWith('en')) ||
+      tracks.find((t) => t.lang?.toLowerCase().startsWith('hi')) ||
       tracks[0];
     if (!pick?.baseUrl) return null;
 
@@ -320,7 +338,8 @@
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 6000);
       try {
-        const res = await fetch(url, { signal: ctrl.signal, credentials: 'include' });
+        // Do not include credentials: 'include' as YouTube's timedtext CDN has wildcard CORS
+        const res = await fetch(url, { signal: ctrl.signal });
         const body = await res.text();
         if (!res.ok || !body) return null;
         

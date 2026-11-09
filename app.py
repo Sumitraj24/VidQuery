@@ -417,25 +417,226 @@ def extract_video_id(url):
             return urlparse.parse_qs(parsed.query)["v"][0]
     return None
 
-def fetch_transcript_fallback(video_id):
-    import yt_dlp
+def fetch_transcript_innertube(video_id):
+    """Fetch transcript using YouTube's InnerTube API directly.
+    
+    This bypasses yt-dlp entirely and is much faster. YouTube's InnerTube API
+    is the same API the official YouTube app/website uses internally.
+    """
     import requests
+    import json as _json
+    
+    # Step 1: Get the video page to extract the API key and caption tracks
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+    }
+    
+    try:
+        page_url = f'https://www.youtube.com/watch?v={video_id}'
+        resp = requests.get(page_url, headers=headers, timeout=10, verify=False)
+        resp.raise_for_status()
+        page_html = resp.text
+        
+        # Extract caption tracks from ytInitialPlayerResponse
+        match = re.search(r'ytInitialPlayerResponse\s*=\s*({.+?});\s*(?:var\s|</script)', page_html)
+        if not match:
+            # Try alternative pattern
+            match = re.search(r'ytInitialPlayerResponse\s*=\s*({.+?});', page_html)
+        
+        if match:
+            player_resp = _json.loads(match.group(1))
+            captions = player_resp.get('captions', {})
+            renderer = captions.get('playerCaptionsTracklistRenderer', {})
+            tracks = renderer.get('captionTracks', [])
+            
+            if tracks:
+                # Pick best track: prefer English manual, then English auto, then Hindi, then first
+                pick = None
+                for t in tracks:
+                    lang = (t.get('languageCode') or '').lower()
+                    kind = (t.get('kind') or '')
+                    if lang.startswith('en') and kind != 'asr':
+                        pick = t
+                        break
+                if not pick:
+                    for t in tracks:
+                        lang = (t.get('languageCode') or '').lower()
+                        if lang.startswith('en'):
+                            pick = t
+                            break
+                if not pick:
+                    for t in tracks:
+                        lang = (t.get('languageCode') or '').lower()
+                        if lang.startswith('hi'):
+                            pick = t
+                            break
+                if not pick:
+                    pick = tracks[0]
+                
+                base_url = pick.get('baseUrl', '')
+                if base_url:
+                    # Fetch as json3 format
+                    sep = '&' if '?' in base_url else '?'
+                    sub_resp = requests.get(base_url + sep + 'fmt=json3', headers=headers, timeout=10, verify=False)
+                    if sub_resp.ok:
+                        try:
+                            data = sub_resp.json()
+                            formatted = []
+                            for ev in data.get('events', []):
+                                if 'segs' not in ev:
+                                    continue
+                                text = ''.join(seg.get('utf8', '') for seg in ev['segs']).strip()
+                                if not text:
+                                    continue
+                                formatted.append({
+                                    'text': text,
+                                    'start': ev.get('tStartMs', 0) / 1000.0,
+                                    'duration': ev.get('dDurationMs', 0) / 1000.0,
+                                })
+                            if formatted:
+                                return formatted
+                        except Exception:
+                            pass
+                    
+                    # Fallback: fetch as XML
+                    sub_resp = requests.get(base_url, headers=headers, timeout=10, verify=False)
+                    if sub_resp.ok:
+                        import xml.etree.ElementTree as ET
+                        try:
+                            root = ET.fromstring(sub_resp.text)
+                            formatted = []
+                            for text_el in root.findall('.//text'):
+                                text = (text_el.text or '').strip()
+                                start = float(text_el.get('start', '0'))
+                                if text:
+                                    formatted.append({'text': html.unescape(text), 'start': start, 'duration': float(text_el.get('dur', '0'))})
+                            if formatted:
+                                return formatted
+                        except Exception:
+                            pass
+    except Exception as e:
+        print(f"InnerTube transcript fetch failed: {e}")
+    
+    # Step 2: Try InnerTube API directly (for when page scraping fails)
+    try:
+        innertube_url = 'https://www.youtube.com/youtubei/v1/get_transcript'
+        payload = {
+            'context': {
+                'client': {
+                    'clientName': 'WEB',
+                    'clientVersion': '2.20241120.01.00',
+                    'hl': 'en',
+                    'gl': 'US',
+                }
+            },
+            'params': _generate_transcript_params(video_id),
+        }
+        api_headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': headers['User-Agent'],
+            'Origin': 'https://www.youtube.com',
+            'Referer': f'https://www.youtube.com/watch?v={video_id}',
+        }
+        resp = requests.post(innertube_url, json=payload, headers=api_headers, timeout=10, verify=False)
+        if resp.ok:
+            data = resp.json()
+            # Navigate the InnerTube transcript response structure
+            actions = data.get('actions', [])
+            for action in actions:
+                panel = action.get('updateEngagementPanelAction', {}).get('content', {})
+                transcript_renderer = panel.get('transcriptRenderer', {}).get('content', {})
+                body = transcript_renderer.get('transcriptSearchPanelRenderer', {}).get('body', {})
+                segments = body.get('transcriptSegmentListRenderer', {}).get('initialSegments', [])
+                
+                formatted = []
+                for seg in segments:
+                    seg_renderer = seg.get('transcriptSegmentRenderer', {})
+                    text = seg_renderer.get('snippet', {}).get('runs', [{}])
+                    text_str = ''.join(r.get('text', '') for r in text).strip()
+                    start_ms = int(seg_renderer.get('startMs', '0'))
+                    end_ms = int(seg_renderer.get('endMs', '0'))
+                    if text_str:
+                        formatted.append({
+                            'text': text_str,
+                            'start': start_ms / 1000.0,
+                            'duration': (end_ms - start_ms) / 1000.0,
+                        })
+                if formatted:
+                    return formatted
+    except Exception as e:
+        print(f"InnerTube API transcript fetch failed: {e}")
+    
+    return None
+
+
+def _generate_transcript_params(video_id):
+    """Generate the protobuf-encoded params for InnerTube get_transcript."""
+    import base64
+    # This is the base64-encoded protobuf that YouTube expects.
+    # It encodes: field 1 (string) = video_id
+    # Simplified: we just construct the minimal protobuf manually
+    vid_bytes = video_id.encode('utf-8')
+    # Protobuf: field 1, wire type 2 (length-delimited) = 0x0A
+    inner = b'\x0a' + bytes([len(vid_bytes)]) + vid_bytes
+    # Wrap in outer message
+    outer = b'\x0a' + bytes([len(inner)]) + inner
+    return base64.b64encode(outer).decode('ascii')
+
+
+def fetch_transcript_ytdlp(video_id):
+    """Last-resort fallback using yt-dlp with updated client configs."""
+    import yt_dlp
+    import requests as _requests
+    
+    # Use ios and mweb clients which are more reliable in 2025-2026
     ydl_opts = {
         'skip_download': True,
         'writesubtitles': True,
         'writeautomaticsub': True,
         'subtitlesformat': 'json3',
         'quiet': True,
+        'no_warnings': True,
+        'socket_timeout': 10,
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['mweb', 'ios', 'tv_embedded'],
+                'player_skip': ['webpage', 'configs'],
+            }
+        },
     }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(f'https://www.youtube.com/watch?v={video_id}', download=False)
-        subs = info.get('requested_subtitles') or info.get('automatic_captions') or info.get('subtitles')
-        if not subs: return None
-        
-        url = None
-        for lang in ['en', 'hi', 'en-IN', list(subs.keys())[0]]:
-            if lang in subs:
-                sub_info = subs[lang]
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(f'https://www.youtube.com/watch?v={video_id}', download=False)
+            subs = info.get('requested_subtitles') or {}
+            if not subs:
+                # Try automatic_captions
+                auto_caps = info.get('automatic_captions') or {}
+                manual_subs = info.get('subtitles') or {}
+                subs = {**auto_caps, **manual_subs}
+            if not subs:
+                return None
+            
+            url = None
+            for lang in ['en', 'en-US', 'en-GB', 'en-IN', 'hi']:
+                if lang in subs:
+                    sub_info = subs[lang]
+                    if isinstance(sub_info, dict):
+                        url = sub_info.get('url')
+                    elif isinstance(sub_info, list):
+                        for s in sub_info:
+                            if s.get('ext') == 'json3':
+                                url = s['url']
+                                break
+                        if not url and sub_info:
+                            url = sub_info[0].get('url')
+                    if url:
+                        break
+            
+            if not url:
+                # Try first available language
+                first_lang = list(subs.keys())[0]
+                sub_info = subs[first_lang]
                 if isinstance(sub_info, dict):
                     url = sub_info.get('url')
                 elif isinstance(sub_info, list):
@@ -443,26 +644,33 @@ def fetch_transcript_fallback(video_id):
                         if s.get('ext') == 'json3':
                             url = s['url']
                             break
-                    if not url: url = sub_info[0].get('url')
-                if url: break
-                
-        if not url: return None
-        
-        r = requests.get(url, verify=False)
-        r.raise_for_status()
-        data = r.json()
-        
-        formatted = []
-        for ev in data.get('events', []):
-            if 'segs' not in ev: continue
-            text = "".join([seg.get('utf8', '') for seg in ev['segs']])
-            if not text.strip(): continue
-            formatted.append({
-                'text': text.strip(),
-                'start': ev.get('tStartMs', 0) / 1000.0,
-                'duration': ev.get('dDurationMs', 0) / 1000.0
-            })
-        return formatted
+                    if not url and sub_info:
+                        url = sub_info[0].get('url')
+            
+            if not url:
+                return None
+            
+            r = _requests.get(url, verify=False, timeout=10)
+            r.raise_for_status()
+            data = r.json()
+            
+            formatted = []
+            for ev in data.get('events', []):
+                if 'segs' not in ev:
+                    continue
+                text = ''.join(seg.get('utf8', '') for seg in ev['segs']).strip()
+                if not text:
+                    continue
+                formatted.append({
+                    'text': text,
+                    'start': ev.get('tStartMs', 0) / 1000.0,
+                    'duration': ev.get('dDurationMs', 0) / 1000.0,
+                })
+            return formatted if formatted else None
+    except Exception as e:
+        print(f"yt-dlp fallback failed: {e}")
+        raise
+
 
 @app.post("/api/process_youtube")
 def process_youtube(req: YTRequest):
@@ -473,9 +681,9 @@ def process_youtube(req: YTRequest):
     video_title = "YouTube Video Analysis"
     try:
         url = f"https://www.youtube.com/watch?v={video_id}"
-        req_obj = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        req_obj = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'})
         context = ssl._create_unverified_context()
-        with urllib.request.urlopen(req_obj, context=context) as response:
+        with urllib.request.urlopen(req_obj, context=context, timeout=8) as response:
             html_content = response.read().decode('utf-8', errors='ignore')
             match = re.search(r'<title>(.*?)</title>', html_content)
             if match:
@@ -484,56 +692,87 @@ def process_youtube(req: YTRequest):
     except Exception as e:
         print("Could not fetch title:", e)
     
+    errors = []
+    transcript = None
+    
+    # Method 1: youtube-transcript-api (fastest when it works)
     try:
+        api = YouTubeTranscriptApi()
+        transcript_list = api.list(video_id)
+        t = None
         try:
-            api = YouTubeTranscriptApi()
-            transcript_list = api.list(video_id)
+            t = transcript_list.find_transcript(['en', 'en-US', 'en-GB', 'en-IN', 'hi'])
+        except Exception:
             try:
-                t = transcript_list.find_transcript(['hi', 'en', 'en-IN'])
-            except:
-                t = transcript_list.find_generated_transcript(['hi', 'en', 'en-IN'])
+                t = transcript_list.find_generated_transcript(['en', 'en-US', 'en-GB', 'en-IN', 'hi'])
+            except Exception:
+                for item in transcript_list:
+                    t = item
+                    break
+        if not t:
+            raise Exception("No transcript found in transcript list")
+            
+        if t.language_code not in ('en', 'en-US', 'en-GB', 'en-IN') and getattr(t, 'is_translatable', True):
+            try:
+                t = t.translate('en')
+            except Exception as trans_err:
+                print("Translation to English failed:", trans_err)
                 
-            # If the video is in Hindi (or another language), translate the transcript to English!
-            if t.language_code != 'en' and getattr(t, 'is_translatable', True):
-                try:
-                    t = t.translate('en')
-                except Exception as trans_err:
-                    print("Translation to English failed:", trans_err)
-                    
-            transcript = t.fetch()
-        except Exception as e:
-            print("Primary transcript API failed, trying yt-dlp fallback:", e)
-            try:
-                transcript = fetch_transcript_fallback(video_id)
-                if not transcript:
-                    raise Exception("Fallback returned no subtitles")
-            except Exception as fallback_e:
-                return {"error": f"Could not fetch transcript (IP might be blocked). Fallback also failed: {str(fallback_e)}"}
-            
-        # Format raw transcript for LLMs
-        raw_text = ""
-        transcript_data = []
-        for t in transcript:
-            if isinstance(t, dict):
-                start_sec = float(t.get('start', 0.0))
-                text_content = str(t.get('text', ''))
-            else:
-                start_sec = float(getattr(t, 'start', 0.0))
-                text_content = str(getattr(t, 'text', ''))
-            raw_text += f"[{start_sec:.1f}s] {text_content}\n"
-            transcript_data.append({"start": start_sec, "text": text_content})
-            
-        return {
-            "success": True, 
-            "video_id": video_id, 
-            "video_title": video_title,
-            "transcript": transcript_data,
-            "raw_text": raw_text,
-            "key_moments": None
-        }
-        
+        transcript = t.fetch()
+        print(f"[Transcript] youtube-transcript-api succeeded for {video_id}")
     except Exception as e:
-        return {"error": str(e)}
+        errors.append(f"youtube-transcript-api: {e}")
+        print(f"[Transcript] Method 1 (youtube-transcript-api) failed: {e}")
+    
+    # Method 2: InnerTube direct (fast, no dependencies, very reliable)
+    if not transcript:
+        try:
+            transcript = fetch_transcript_innertube(video_id)
+            if transcript:
+                print(f"[Transcript] InnerTube succeeded for {video_id}")
+            else:
+                raise Exception("InnerTube returned no captions")
+        except Exception as e:
+            errors.append(f"innertube: {e}")
+            print(f"[Transcript] Method 2 (InnerTube) failed: {e}")
+    
+    # Method 3: yt-dlp (slowest, last resort)
+    if not transcript:
+        try:
+            transcript = fetch_transcript_ytdlp(video_id)
+            if transcript:
+                print(f"[Transcript] yt-dlp succeeded for {video_id}")
+            else:
+                raise Exception("yt-dlp returned no subtitles")
+        except Exception as e:
+            errors.append(f"yt-dlp: {e}")
+            print(f"[Transcript] Method 3 (yt-dlp) failed: {e}")
+    
+    if not transcript:
+        error_detail = "; ".join(errors)
+        return {"error": f"Could not fetch transcript. All methods failed: {error_detail}"}
+    
+    # Format raw transcript for LLMs
+    raw_text = ""
+    transcript_data = []
+    for t in transcript:
+        if isinstance(t, dict):
+            start_sec = float(t.get('start', 0.0))
+            text_content = str(t.get('text', ''))
+        else:
+            start_sec = float(getattr(t, 'start', 0.0))
+            text_content = str(getattr(t, 'text', ''))
+        raw_text += f"[{start_sec:.1f}s] {text_content}\n"
+        transcript_data.append({"start": start_sec, "text": text_content})
+        
+    return {
+        "success": True, 
+        "video_id": video_id, 
+        "video_title": video_title,
+        "transcript": transcript_data,
+        "raw_text": raw_text,
+        "key_moments": None
+    }
 
 @app.post("/api/key_moments")
 def generate_key_moments(req: KeyMomentsRequest):
