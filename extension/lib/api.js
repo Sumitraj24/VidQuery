@@ -1,7 +1,7 @@
 // Settings + typed client for the VidQuery backend (/api/ext/*).
 
 export const DEFAULT_SETTINGS = {
-  apiBase: 'https://newspapers-forecast-recorder-lance.trycloudflare.com',
+  apiBase: 'https://vidquery-3ta4.onrender.com',
   language: 'auto', // auto | english | hinglish
   markers: true, // key-moment markers on YouTube's progress bar
   follow: true, // transcript follows playback

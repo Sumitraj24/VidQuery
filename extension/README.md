@@ -31,7 +31,7 @@ YouTube tabs that were already open are connected automatically; if anything loo
 
 ## Settings
 
-Click the gear in the panel to change the backend URL (default `http://localhost:8000`), the default reply language, progress-bar markers and transcript follow-along. A non-localhost URL asks for permission to reach that server. Shortcuts can be changed at `chrome://extensions/shortcuts`.
+Click the gear in the panel to change the backend URL (default `https://vidquery-3ta4.onrender.com`), the default reply language, progress-bar markers and transcript follow-along. A non-localhost URL asks for permission to reach that server. Shortcuts can be changed at `chrome://extensions/shortcuts`.
 
 ## Privacy
 

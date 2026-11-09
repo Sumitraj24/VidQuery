@@ -771,7 +771,7 @@ function normaliseBase(value) {
   try {
     url = new URL(value.trim());
   } catch (e) {
-    throw new Error('Enter a full URL, for example http://localhost:8000');
+    throw new Error('Enter a full URL, for example https://vidquery-3ta4.onrender.com');
   }
   if (!/^https?:$/.test(url.protocol)) throw new Error('Use an http:// or https:// URL');
   return url.origin;
