@@ -9,3 +9,4 @@ yt-dlp
 requests
 httpx
 openai
+gunicorn

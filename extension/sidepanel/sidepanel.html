@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VidQuery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 1-1h11l-1.5 4L16 11H5"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4z"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.5 6.2L3 16M3 21v-5h5"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+    <symbol id="i-follow" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></symbol>
+    <symbol id="i-yt" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M22.5 6.4a2.8 2.8 0 0 0-2-2C18.9 4 12 4 12 4s-6.9 0-8.5.4a2.8 2.8 0 0 0-2 2C1 8.2 1 12 1 12s0 3.8.5 5.6a2.8 2.8 0 0 0 2 2c1.6.4 8.5.4 8.5.4s6.9 0 8.5-.4a2.8 2.8 0 0 0 2-2c.5-1.8.5-5.6.5-5.6s0-3.8-.5-5.6z"/><path fill="#fff" stroke="none" d="m9.8 15 5.7-3-5.7-3z"/></symbol>
+  </svg>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <header class="hdr">
+    <div class="brand">
+      <span class="brand-mark"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
+      <span>Vid<span class="brand-accent">Query</span></span>
+    </div>
+    <div class="hdr-right">
+      <button type="button" class="status" id="statusChip" title="Connection status">
+        <span class="dot"></span><span id="statusText">Connecting…</span>
+      </button>
+      <button type="button" class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings"><svg class="i"><use href="#i-gear"/></svg></button>
+    </div>
+  </header>
+
+  <!-- ===== Not on a YouTube video ===== -->
+  <main class="view" id="viewEmpty" hidden>
+    <div class="empty-hero fade-up">
+      <div class="empty-art">
+        <div class="empty-screen"><svg class="i" style="width:34px;height:34px;color:#fff"><use href="#i-play"/></svg></div>
+        <div class="empty-bubble">explain this part ✨</div>
+      </div>
+      <h1>Open a YouTube video<br><span class="grad-text">and start learning.</span></h1>
+      <p>VidQuery turns any lecture into a chat, key moments, a mind map and notes, right beside the video.</p>
+      <button type="button" class="btn-primary" id="openYoutube"><svg class="i"><use href="#i-yt"/></svg> Go to YouTube</button>
+    </div>
+    <section class="onboard fade-up" id="onboard" hidden>
+      <div class="onboard-head"><b>👋 Quick tour</b><button type="button" class="link" id="onboardClose">Got it</button></div>
+      <ul>
+        <li><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Q</kbd> opens VidQuery from any YouTube tab.</li>
+        <li><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> explains whatever is playing right now.</li>
+        <li>Blue dots on the progress bar are key moments. Hover to preview, click to jump.</li>
+        <li>Select any text on YouTube, right-click, then “Ask VidQuery”.</li>
+      </ul>
+    </section>
+    <section class="recent fade-up" id="recentWrap" hidden>
+      <h2>Continue studying</h2>
+      <div id="recentList" class="recent-list"></div>
+    </section>
+  </main>
+
+  <!-- ===== Video workspace ===== -->
+  <main class="view" id="viewVideo" hidden>
+    <section class="vcard" id="vcard">
+      <img class="vthumb" id="vThumb" alt="">
+      <div class="vinfo">
+        <h1 class="vtitle" id="vTitle"></h1>
+        <div class="vmeta">
+          <span class="live" id="vLive"><svg class="i"><use href="#i-play"/></svg><span id="vTime">0:00</span></span>
+          <span id="vStatus" class="vstatus"></span>
+        </div>
+      </div>
+    </section>
+
+    <nav class="tabs" role="tablist" id="tabs">
+      <button type="button" role="tab" class="tab active" data-tab="chat"><svg class="i"><use href="#i-chat"/></svg>Chat</button>
+      <button type="button" role="tab" class="tab" data-tab="moments"><svg class="i"><use href="#i-flag"/></svg>Moments</button>
+      <button type="button" role="tab" class="tab" data-tab="transcript"><svg class="i"><use href="#i-doc"/></svg>Transcript</button>
+      <button type="button" role="tab" class="tab" data-tab="mindmap"><svg class="i"><use href="#i-map"/></svg>Mind map</button>
+      <button type="button" role="tab" class="tab" data-tab="notes"><svg class="i"><use href="#i-note"/></svg>Notes</button>
+    </nav>
+
+    <!-- Chat -->
+    <section class="panel active" data-panel="chat">
+      <div class="thread" id="thread" aria-live="polite"></div>
+      <div class="composer-wrap">
+        <div class="quick" id="quick">
+          <button type="button" data-quick="moment"><svg class="i"><use href="#i-clock"/></svg>Explain this moment</button>
+          <button type="button" data-quick="summary">📄 Summary</button>
+          <button type="button" data-quick="notes">📝 Notes</button>
+          <button type="button" data-quick="qa">🧠 Quiz me</button>
+        </div>
+        <form class="composer" id="composer">
+          <textarea id="chatInput" rows="1" placeholder="Ask anything about this video…" aria-label="Message"></textarea>
+          <button type="submit" class="send" id="sendBtn" aria-label="Send"><svg class="i"><use href="#i-send"/></svg></button>
+        </form>
+        <div class="composer-foot">
+          <div class="lang" role="group" aria-label="Reply language">
+            <button type="button" data-lang="auto" title="Replies in the language you type">Auto</button>
+            <button type="button" data-lang="english">English</button>
+            <button type="button" data-lang="hinglish">Hinglish</button>
+          </div>
+          <button type="button" class="link muted" id="clearChat">Clear chat</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Moments -->
+    <section class="panel" data-panel="moments">
+      <div class="panel-head">
+        <span class="badge" id="momentsBadge"></span>
+        <label class="switch" title="Show markers on YouTube's progress bar">
+          <input type="checkbox" id="markersToggle"><span></span>Progress-bar markers
+        </label>
+      </div>
+      <div class="moments" id="moments"></div>
+    </section>
+
+    <!-- Transcript -->
+    <section class="panel" data-panel="transcript">
+      <div class="panel-head">
+        <div class="search">
+          <svg class="i"><use href="#i-search"/></svg>
+          <input type="search" id="searchInput" placeholder="Search the transcript" autocomplete="off">
+          <span class="hits" id="searchHits"></span>
+          <button type="button" class="icon-btn sm" id="prevHit" title="Previous match"><svg class="i"><use href="#i-up"/></svg></button>
+          <button type="button" class="icon-btn sm" id="nextHit" title="Next match"><svg class="i"><use href="#i-down"/></svg></button>
+        </div>
+      </div>
+      <div class="panel-sub">
+        <label class="switch"><input type="checkbox" id="followToggle"><span></span>Follow video</label>
+        <button type="button" class="link" id="copyTranscript"><svg class="i"><use href="#i-copy"/></svg>Copy</button>
+      </div>
+      <div class="transcript" id="transcript"></div>
+    </section>
+
+    <!-- Mind map -->
+    <section class="panel" data-panel="mindmap">
+      <div class="panel-head">
+        <span class="badge" id="mindmapBadge"></span>
+        <button type="button" class="btn-ghost sm" id="mindmapRegen"><svg class="i"><use href="#i-refresh"/></svg>Regenerate</button>
+      </div>
+      <div class="mindmap" id="mindmap"></div>
+    </section>
+
+    <!-- Notes -->
+    <section class="panel" data-panel="notes">
+      <div class="panel-head">
+        <div class="seg" role="group">
+          <button type="button" class="active" data-notes="write">Write</button>
+          <button type="button" data-notes="preview">Preview</button>
+        </div>
+        <span class="saved" id="notesSaved"></span>
+      </div>
+      <div class="notes-tools">
+        <button type="button" class="btn-ghost sm" id="noteStamp"><svg class="i"><use href="#i-clock"/></svg>Timestamp</button>
+        <button type="button" class="btn-ghost sm" id="noteCopy"><svg class="i"><use href="#i-copy"/></svg>Copy</button>
+        <button type="button" class="btn-ghost sm primary" id="noteExport"><svg class="i"><use href="#i-download"/></svg>Export .md</button>
+      </div>
+      <textarea id="notesInput" class="notes" placeholder="Write your notes here…&#10;&#10;Tip: press Timestamp to link the current moment, or click “Save to notes” under any answer."></textarea>
+      <div id="notesPreview" class="notes prose" hidden></div>
+    </section>
+  </main>
+
+  <!-- ===== Server unreachable ===== -->
+  <main class="view" id="viewServer" hidden>
+    <div class="server-off fade-up">
+      <div class="server-icon">⚡</div>
+      <h1>VidQuery server is offline</h1>
+      <p>The extension talks to your VidQuery backend at <code id="serverUrl"></code>. Start it, then retry.</p>
+      <pre class="cmd" id="serverCmd">cd VidQuery
+.venv/bin/python -m uvicorn app:app --port 8000</pre>
+      <div class="row">
+        <button type="button" class="btn-primary" id="retryServer"><svg class="i"><use href="#i-refresh"/></svg> Retry</button>
+        <button type="button" class="btn-ghost" id="serverSettings"><svg class="i"><use href="#i-gear"/></svg> Change URL</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Settings ===== -->
+  <main class="view" id="viewSettings" hidden>
+    <div class="settings fade-up">
+      <button type="button" class="link back" id="settingsBack"><svg class="i"><use href="#i-back"/></svg>Back</button>
+      <h1>Settings</h1>
+
+      <label class="field">
+        <span>Backend URL</span>
+        <div class="field-row">
+          <input type="url" id="apiBase" placeholder="http://localhost:8000" spellcheck="false">
+          <button type="button" class="btn-ghost sm" id="testApi">Test</button>
+        </div>
+        <small id="apiResult" class="muted">Where your VidQuery server runs.</small>
+      </label>
+
+      <label class="field">
+        <span>Default reply language</span>
+        <select id="langSelect">
+          <option value="auto">Auto (match how I type)</option>
+          <option value="english">English</option>
+          <option value="hinglish">Hinglish</option>
+        </select>
+      </label>
+
+      <label class="switch row-switch"><input type="checkbox" id="setMarkers"><span></span>Key-moment markers on YouTube's progress bar</label>
+      <label class="switch row-switch"><input type="checkbox" id="setFollow"><span></span>Transcript follows the video</label>
+      <label class="switch row-switch"><input type="checkbox" id="setAdBlocker"><span></span>Auto-skip & mute video ads</label>
+
+      <div class="settings-actions">
+        <button type="button" class="btn-primary" id="saveSettings">Save settings</button>
+        <button type="button" class="btn-ghost" id="shortcutsBtn"><svg class="i"><use href="#i-link"/></svg>Keyboard shortcuts</button>
+        <button type="button" class="btn-ghost danger" id="clearCache"><svg class="i"><use href="#i-trash"/></svg>Clear cached analysis</button>
+      </div>
+      <p class="muted small">Chats and notes are stored only in this browser. Clearing the cache keeps them.</p>
+      <p class="muted small" id="version"></p>
+      <div style="margin-top: 1.5rem; padding-top: 0.85rem; border-top: 1px solid var(--border, #e2e8f0); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #64748b;">
+        <span>Developed by <a href="https://github.com/sumitraj24" target="_blank" rel="noopener" style="color: #0f172a; font-weight: 600; text-decoration: none;">Sumit Raj</a></span>
+        <span style="color: #94a3b8;">v1.0.0</span>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>

@@ -32,6 +32,7 @@ templates = Jinja2Templates(directory="templates")
 
 import time
 import study_offline
+import prompts
 
 # When the gateway refuses connections we skip it for a short while instead of
 # making every request wait through all candidate models.
@@ -41,8 +42,33 @@ LLM_COOLDOWN_SECONDS = 30
 def llm_base_url():
     return os.environ.get("FREELLMAPI_BASE_URL", "http://127.0.0.1:31415/v1").rstrip("/")
 
-# Helper function to generate AI responses using FreeLLMAPI
-def generate_ai_response(user_prompt: str, system_prompt: str = None, json_mode: bool = False):
+import queue
+import threading
+
+# Models FreeLLMAPI serves quickly even with a full lecture transcript (measured on
+# this gateway: first token in ~1s). "auto" is kept last because it sometimes routes
+# to providers that take 15-60s. Override with FREELLMAPI_FAST_MODELS in .env.
+FAST_MODELS = [m.strip() for m in os.environ.get(
+    "FREELLMAPI_FAST_MODELS", "claude-haiku-4-5,gemini-flash-lite,gemini-3.5-flash-lite,auto"
+).split(",") if m.strip()]
+# If a model hasn't produced its first token by then, race the next one in parallel.
+HEDGE_SECONDS = float(os.environ.get("FREELLMAPI_HEDGE_SECONDS", "3.5"))
+FIRST_TOKEN_DEADLINE = 45
+
+
+def _model_order():
+    preferred = os.environ.get("FREELLMAPI_MODEL", "auto")
+    order = [] if preferred in ("", "auto") else [preferred]
+    return order + [m for m in FAST_MODELS if m not in order]
+
+
+def generate_ai_stream(messages, json_mode=False, max_tokens=None):
+    """Yield answer text as it arrives, using hedged requests across fast models.
+
+    The first model to produce a token wins; slower requests are cancelled. A model
+    that errors before its first token is skipped at once. Raises only if no model
+    produces any text, or if the winning stream breaks midway.
+    """
     global _llm_down_until
     from openai import OpenAI, APIConnectionError
     import httpx
@@ -50,55 +76,106 @@ def generate_ai_response(user_prompt: str, system_prompt: str = None, json_mode:
     if time.time() < _llm_down_until:
         raise Exception("FreeLLMAPI gateway marked unreachable; skipping")
 
-    base_url = llm_base_url()
-    api_key = os.environ.get("FREELLMAPI_API_KEY", "")
-    preferred_model = os.environ.get("FREELLMAPI_MODEL", "auto")
+    client = OpenAI(
+        base_url=llm_base_url(),
+        api_key=os.environ.get("FREELLMAPI_API_KEY", ""),
+        http_client=httpx.Client(verify=False),
+        timeout=60,
+        max_retries=0,
+    )
+    extra = {}
+    if json_mode:
+        extra["response_format"] = {"type": "json_object"}
+    if max_tokens:
+        extra["max_tokens"] = max_tokens
 
+    models = _model_order()
+    events = queue.Queue()
+    lock = threading.Lock()
+    state = {"winner": None, "done": False}
+
+    def worker(model):
+        try:
+            stream = client.chat.completions.create(model=model, messages=messages, stream=True, **extra)
+            for chunk in stream:
+                if state["done"] or (state["winner"] not in (None, model)):
+                    stream.close()
+                    return
+                delta = chunk.choices[0].delta.content if chunk.choices else None
+                if not delta:
+                    continue
+                with lock:
+                    if state["winner"] is None:
+                        state["winner"] = model
+                        print(f"FreeLLMAPI stream won by '{model}'")
+                if state["winner"] != model:
+                    stream.close()
+                    return
+                events.put(("delta", model, delta))
+            events.put(("end", model, None))
+        except APIConnectionError as e:
+            events.put(("conn", model, e))
+        except Exception as e:
+            events.put(("error", model, e))
+
+    launched, failed = 0, 0
+    next_launch = 0.0
+
+    def launch():
+        nonlocal launched, next_launch
+        threading.Thread(target=worker, args=(models[launched],), daemon=True).start()
+        launched += 1
+        next_launch = time.time() + HEDGE_SECONDS
+
+    started_at = time.time()
+    launch()
+    try:
+        while True:
+            racing = state["winner"] is None
+            wait = max(0.05, next_launch - time.time()) if racing and launched < len(models) else 1.0
+            try:
+                kind, model, payload = events.get(timeout=wait)
+            except queue.Empty:
+                if racing:
+                    if time.time() - started_at > FIRST_TOKEN_DEADLINE:
+                        raise Exception("No model answered in time")
+                    if launched < len(models) and time.time() >= next_launch:
+                        launch()
+                continue
+            if kind == "delta":
+                yield payload
+            elif kind == "end":
+                if model == state["winner"]:
+                    return
+                if state["winner"] is None:  # finished without any text
+                    failed += 1
+            else:
+                if kind == "conn":
+                    _llm_down_until = time.time() + LLM_COOLDOWN_SECONDS
+                    raise Exception(f"FreeLLMAPI unreachable: {payload}")
+                if model == state["winner"]:
+                    raise payload  # broke midway; caller keeps what it has
+                print(f"FreeLLMAPI model '{model}' failed: {str(payload)[:160]}")
+                failed += 1
+            if state["winner"] is None and failed >= launched:
+                if launched < len(models):
+                    launch()
+                else:
+                    raise Exception("All candidate models failed")
+    finally:
+        state["done"] = True
+
+
+def generate_ai_response(user_prompt: str, system_prompt: str = None, json_mode: bool = False):
+    """Complete (non-streaming) answer, built on the same hedged fast-model path."""
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": user_prompt})
-
-    kwargs = {}
-    if json_mode:
-        kwargs["response_format"] = {"type": "json_object"}
-
-    # Try preferred model first, then solid fallbacks from FreeLLMAPI if needed
-    candidate_models = [preferred_model]
-    for fallback in ["auto", "gemini-flash", "fusion", "gemini-3.8-flash"]:
-        if fallback not in candidate_models:
-            candidate_models.append(fallback)
-
-    last_error = None
-    client = OpenAI(
-        base_url=base_url,
-        api_key=api_key,
-        http_client=httpx.Client(verify=False),
-        timeout=90,
-        max_retries=0,
-    )
-
-    for model_name in candidate_models:
-        try:
-            print(f"Attempting FreeLLMAPI (model='{model_name}')...")
-            completion = client.chat.completions.create(
-                model=model_name,
-                messages=messages,
-                **kwargs
-            )
-            content = completion.choices[0].message.content
-            if content:
-                print(f"FreeLLMAPI Success with model '{model_name}'!")
-                return content.strip()
-        except APIConnectionError as e:
-            print(f"FreeLLMAPI unreachable at {base_url}: {e}")
-            _llm_down_until = time.time() + LLM_COOLDOWN_SECONDS
-            raise
-        except Exception as e:
-            print(f"FreeLLMAPI attempt with model '{model_name}' failed: {e}")
-            last_error = e
-
-    raise Exception(f"FreeLLMAPI request failed across all candidate models: {last_error}")
+    text = "".join(generate_ai_stream(messages, json_mode=json_mode)).strip()
+    if not text:
+        raise Exception("FreeLLMAPI returned an empty answer")
+    return text
 
 def parse_llm_json(text: str):
     """Safely extracts and parses JSON from LLM output, handling markdown code fences."""
@@ -539,32 +616,13 @@ def chat_with_video(req: ChatRequest, request: Request):
     if user:
         user_id = user.id
     language = study_offline.resolve_language(req.language, req.query)
-    language_rule = {
-        "english": "Write the \"answer\" in clear, simple English.",
-        "hinglish": (
-            "Write the \"answer\" in Hinglish: friendly conversational Hindi written ONLY in Roman (English) letters, "
-            "mixed naturally with English, the way Indian students talk. Keep technical terms in English. "
-            "Example: \"Sigmoid function ek squishing function hai jo kisi bhi number ko 0 aur 1 ke beech le aata hai.\" "
-            "Never use Devanagari script. This applies to EVERYTHING you write: questions, answers, headings and bullets. "
-            "Example question: \"**Q1.** Input layer mein kitne neurons hote hain?\""
-        ),
-    }[language]
-    mode_rule = {
-        "summary": "TASK: a crisp summary. Start with a 1-line 🎯 gist, then 4-6 sections as '### emoji Title' each with 2-3 short bullets and a [MM:SS] timestamp. End with a '✅ Key takeaway' line.",
-        "notes": "TASK: exam-ready study notes. Use '### emoji Topic' headings with short bullets; put definitions as '**Term**: meaning'. Include formulas if any. Add [MM:SS] timestamps. End with '📝 Quick revision' (3 bullets).",
-        "qa": "TASK: 5 practice questions. Format each as '**Q1.** question' on one line, then '✅ **Answer:** answer in at most 2 short lines [MM:SS]'. No extra notes after answers. Mix easy and tricky questions. Leave a blank line between questions.",
-    }.get(req.mode, "TASK: answer the student's question directly. Usually 40-120 words.")
+    language_rule = prompts.language_rule(language)
+    mode_rule = prompts.mode_rule(req.mode)
     system_prompt = f"""You are VidQuery, a friendly, expert AI study assistant for students.
 LANGUAGE: {language_rule} Citation titles may stay in English.
 
-STYLE (write like ChatGPT at its best: accurate, to the point, engaging):
-- Lead with the direct answer in 1-2 short sentences. No filler, no restating the question, no "Great question!".
-- Then, only if useful, 2-5 crisp bullet points ("- ") with **bold** key terms.
-- Keep paragraphs to 1-2 sentences. Use line breaks (\\n) between paragraphs and bullets.
-- Use a few relevant emojis (like 💡 🎯 ✅ 📌 🧠 ⚡) to make it lively, about one per paragraph or heading, never one on every bullet.
-- Add [MM:SS] timestamps from the transcript next to the points they support.
-- Be precise: use only facts from the transcript; never invent details. If the video doesn't cover it, say so in one line.
-- For a simple greeting, reply in one or two friendly lines.
+{prompts.STYLE}
+Use \\n line breaks inside the JSON "answer" string.
 {mode_rule}
 You can answer general conversational questions (like "hi", "how are you", "what can you do") normally and politely.
 If the user asks about the video, answer their question based ONLY on the following transcript with timestamps:
@@ -585,7 +643,7 @@ If no specific citation is relevant (for example, if it's a general greeting), s
 REMEMBER THE LANGUAGE: {language_rule}
 """
     # Repeat the language on the message itself; models follow it far more reliably there.
-    user_message = f"{req.query}\n\n(Reply language: {'Hinglish, in Roman script' if language == 'hinglish' else 'English'})"
+    user_message = f"{req.query}\n\n{prompts.language_reminder(language)}"
     try:
         res_text = generate_ai_response(user_message, system_prompt=system_prompt, json_mode=True)
         response_data = parse_llm_json(res_text)
@@ -644,6 +702,28 @@ def get_chat_history(video_id: str, request: Request):
         print(f"Failed to fetch history: {e}")
         return {"history": []}
 
+# ---------------------------------------------------------------------------
+# Chrome extension API (/api/ext/*). Kept in its own module; this wires in the
+# shared helpers so both clients use the same AI, prompts and offline fallbacks.
+# ---------------------------------------------------------------------------
+from fastapi.middleware.cors import CORSMiddleware
+import extension_api
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"^(chrome-extension://[a-p]{32}|http://(localhost|127\.0\.0\.1)(:\d+)?)$",
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
+)
+app.include_router(extension_api.build_router(
+    process_youtube=lambda video_id: process_youtube(YTRequest(url=f"https://www.youtube.com/watch?v={video_id}")),
+    generate_ai_response=generate_ai_response,
+    generate_ai_stream=generate_ai_stream,
+    parse_llm_json=parse_llm_json,
+    ai_status=ai_status,
+))
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=True)

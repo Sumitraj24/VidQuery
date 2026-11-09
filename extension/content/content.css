@@ -1,0 +1,121 @@
+/* VidQuery on youtube.com: progress-bar markers, player button, toast. */
+.vq-markers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+}
+.vq-marker {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  pointer-events: auto;
+  transform: scale(0.85);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  animation: vq-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.vq-marker:hover {
+  transform: scale(1.35);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.35), 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+.vq-marker-tip {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  min-width: 120px;
+  max-width: 240px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.94);
+  color: #fff;
+  font: 500 12px/1.35 "Inter", "Roboto", Arial, sans-serif;
+  text-align: left;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.vq-marker-tip b {
+  display: block;
+  margin-bottom: 2px;
+  color: #93c5fd;
+  font-weight: 700;
+  font-size: 11px;
+}
+.vq-marker:hover .vq-marker-tip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+@keyframes vq-pop {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(0.85); opacity: 1; }
+}
+
+.vq-player-btn {
+  position: relative;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+  text-align: center;
+  width: 48px;
+  height: 100%;
+  padding: 0 !important;
+  opacity: 0.92;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.vq-player-btn:hover {
+  opacity: 1;
+}
+.vq-player-btn svg {
+  display: block;
+  margin: auto;
+  pointer-events: none;
+  width: 36px;
+  height: 36px;
+  transform: translateY(-1.5px);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+.vq-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  z-index: 2147483647;
+  transform: translate(-50%, 12px);
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: #fff;
+  color: #0f172a;
+  font: 600 14px/1.4 "Inter", "Roboto", Arial, sans-serif;
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(59, 130, 246, 0.25);
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.vq-toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* VidQuery Ad-Blocking & Cleaner styles */
+.ytp-ad-overlay-container,
+.ytp-ad-message-container,
+.ytp-ad-action-interstitial,
+.video-ads,
+ytd-banner-promo-renderer,
+ytd-statement-banner-renderer,
+ytd-in-feed-ad-layout-renderer,
+#masthead-ad,
+#player-ads {
+  display: none !important;
+}

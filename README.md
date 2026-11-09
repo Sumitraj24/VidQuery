@@ -40,7 +40,7 @@
 ### 2. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/VidQuery.git
+git clone https://github.com/sumitraj24/VidQuery.git
 cd VidQuery
 ```
 
@@ -115,6 +115,14 @@ You can log in without Supabase using the built-in demo account:
 
 ---
 
+## 🧩 Chrome Extension
+
+VidQuery also runs inside YouTube as a Chrome extension (side panel): streaming chat with clickable timestamps, "Explain this moment", key-moment markers on YouTube's progress bar, transcript search, mind maps and notes, in English or Hinglish. See [`extension/README.md`](extension/README.md) to install it.
+
+### ⚡ Speed
+
+AI requests race the fastest FreeLLMAPI models: if the first hasn't started answering within `FREELLMAPI_HEDGE_SECONDS` (default 3.5s), the next starts in parallel and the first to answer wins. Set the order with `FREELLMAPI_FAST_MODELS` in `.env` (default `claude-haiku-4-5,gemini-flash-lite,gemini-3.5-flash-lite,auto`).
+
 ## 🔌 Offline Mode
 
 If the FreeLLMAPI gateway is not running, VidQuery keeps working. Chat, key moments, summaries, study notes and Q&A fall back to transcript search (`study_offline.py`). When the gateway comes back, AI answers resume automatically.
@@ -156,6 +164,12 @@ VidQuery is configured for serverless deployment on Vercel:
 2. Import the repository into your [Vercel Dashboard](https://vercel.com/dashboard).
 3. In the project settings, add your Environment Variables (`SUPABASE_URL`, `SUPABASE_KEY`, `FREELLMAPI_BASE_URL`, `FREELLMAPI_API_KEY`, `FREELLMAPI_MODEL`).
 4. Click **Deploy**.
+
+---
+
+## 👨‍💻 Author
+
+**Sumit Raj** — [GitHub](https://github.com/sumitraj24)
 
 ---
 

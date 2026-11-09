@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: vidquery-backend
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: FREELLMAPI_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: FREELLMAPI_API_KEY
+        sync: false
+      - key: FREELLMAPI_MODEL
+        value: llama-3.3-70b-versatile
+      - key: FREELLMAPI_FAST_MODELS
+        value: llama-3.3-70b-versatile,llama-3.1-8b-instant
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
