@@ -26,6 +26,7 @@
   "permissions": ["sidePanel", "storage", "unlimitedStorage", "scripting", "contextMenus"],
   "host_permissions": [
     "https://www.youtube.com/*",
+    "https://newspapers-forecast-recorder-lance.trycloudflare.com/*",
     "http://localhost/*",
     "http://127.0.0.1/*"
   ],
