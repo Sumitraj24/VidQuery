@@ -378,14 +378,24 @@
       }
     }
 
-    // Try json3 first
-    let url = pick.baseUrl + (pick.baseUrl.includes('?') ? '&' : '?') + 'fmt=json3';
-    let res = await tryFetch(url);
-    if (res) return res;
+    // Try json3 first, then raw baseUrl, then srv3
+    let res = await tryFetch(pick.baseUrl + (pick.baseUrl.includes('?') ? '&' : '?') + 'fmt=json3');
+    if (res && res.length) return res;
 
-    // Fallback: try raw baseUrl (XML)
     res = await tryFetch(pick.baseUrl);
-    return res;
+    if (res && res.length) return res;
+
+    res = await tryFetch(pick.baseUrl + (pick.baseUrl.includes('?') ? '&' : '?') + 'fmt=srv3');
+    if (res && res.length) return res;
+
+    // If pick was not first, try first track
+    if (tracks[0] && tracks[0].baseUrl !== pick.baseUrl) {
+      res = await tryFetch(tracks[0].baseUrl + (tracks[0].baseUrl.includes('?') ? '&' : '?') + 'fmt=json3');
+      if (res && res.length) return res;
+      res = await tryFetch(tracks[0].baseUrl);
+      if (res && res.length) return res;
+    }
+    return null;
   }
 
   // ---------------------------------------------------------------- messages
