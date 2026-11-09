@@ -10,7 +10,18 @@ export const DEFAULT_SETTINGS = {
 
 export async function loadSettings() {
   const stored = await chrome.storage.sync.get('vq:settings');
-  return { ...DEFAULT_SETTINGS, ...(stored['vq:settings'] || {}) };
+  const settings = { ...DEFAULT_SETTINGS, ...(stored['vq:settings'] || {}) };
+  // Auto-migrate any stale localhost or temporary tunnel URL to the permanent Render cloud backend
+  if (
+    !settings.apiBase ||
+    settings.apiBase.includes('trycloudflare.com') ||
+    settings.apiBase.includes('localhost') ||
+    settings.apiBase.includes('127.0.0.1')
+  ) {
+    settings.apiBase = DEFAULT_SETTINGS.apiBase;
+    await saveSettings(settings);
+  }
+  return settings;
 }
 
 export async function saveSettings(settings) {

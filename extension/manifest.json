@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "VidQuery – AI Study Assistant for YouTube",
   "short_name": "VidQuery",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Chat with any YouTube lecture, jump to key moments, search the transcript, build mind maps and take timestamped notes, in English or Hinglish.",
   "icons": {
     "16": "icons/icon16.png",
